@@ -1,0 +1,44 @@
+Тема №6: Робота з числами та конвертація (Numbers and Type Conversion) 🔢
+Пам’ятаєш, ми говорили, що Console.ReadLine() завжди дає нам текст (string)? Але що, як ми хочемо використати 
+введене число для математики? Наприклад, додати до року одиницю.
+
+Якщо ми спробуємо додати 1 до тексту "2026", комп’ютер просто приклеїть одиницю в кінець і вийде "20261". 
+Щоб зробити з тексту справжнє число, його треба конвертувати.
+Як перетворити текст на ціле число (int):
+Ми використовуємо команду Convert.ToInt32().
+
+🔑 Приклад:
+Console.WriteLine("Скільки тобі років?");
+string input = Console.ReadLine(); // Отримуємо текст, наприклад "25"
+int age = Convert.ToInt32(input);   // Перетворюємо текст "25" на число 25
+int nextYearAge = age + 1;         // Тепер можна рахувати!
+Console.WriteLine($"Наступного року тобі буде {nextYearAge}");
+
+📝 Завдання №6:
+Давай зробимо "Машину часу".
+Запитай у користувача: "Введи свій вік:".
+Зчитай ввід у змінну string.
+Конвертуй цей текст у число (int) за допомогою Convert.ToInt32().
+Створи ще одну числову змінну (наприклад, int ageInFiveYears), яка буде дорівнювати: вік + 5.
+Виведи повідомлення: "Через 5 років тобі буде {ageInFiveYears}!".
+
+✅ Рішення:
+Console.WriteLine("Введи свій вік");
+string inputAge = Console.ReadLine() ?? "";
+int userAge = Convert.ToInt32(inputAge);
+
+int ageInFiveYears = userAge + 5;
+Console.WriteLine($"Через 5 років тобі буде {ageInFiveYears}!");
+
+Console.WriteLine("Скільки у вас цілих доларів?");
+// Конвертація
+int dollars = Convert.ToInt32(Console.ReadLine()!);
+double rate = 0.92 * dollars;
+// Округлення числа до двох чисел після коми
+double roundedRate = Math.Round(rate, 2);
+Console.WriteLine($"Ви можете купити {roundedRate} євро");
+// Перетворюємо double rate на int
+int currency = (int)rate;
+int stack = currency % 10;
+Console.WriteLine($"Автомат видасть цілими: {currency} євро."); 
+Console.WriteLine($"У вас зашилишося {stack} євро не в пачці");
