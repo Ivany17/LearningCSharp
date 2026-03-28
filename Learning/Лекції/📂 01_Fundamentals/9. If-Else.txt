@@ -1,0 +1,70 @@
+Тема №9: Розгалуження або Умовні оператори (If-Else Statements) 🚦
+До цього моменту наша програма просто видавала "True" або "False". Але в реальному житті ми хочемо, щоб програма діяла по-різному 
+залежно від умови. Наприклад: "Якщо тобі є 18 — проходь, якщо немає — приходь пізніше".
+
+Для цього використовується конструкція if (якщо) та else (інакше).
+🔑 Як це виглядає:
+
+if (isAdult == true) 
+{
+    // Цей код виконається, ТІЛЬКИ якщо в дужках "Правда"
+    Console.WriteLine("Ласкаво просимо!");
+}
+else 
+{
+    // Цей код виконається, ТІЛЬКИ якщо в дужках "Брехня"
+    Console.WriteLine("Тобі ще рано сюди.");
+}
+Фігурні дужки { } — це ніби "блокнот" з командами для кожного конкретного випадку.
+У дужках після if ми пишемо саму умову. До речі, замість (isAdult == true) можна просто написати (isAdult), комп'ютер і так зрозуміє, 
+що ми шукаємо правду.
+
+📝 Завдання №9:
+Давай вдосконалимо твою програму для перевірки віку.
+Використай свій код з попереднього завдання (де ти отримуєш вік і створюєш bool isAdult).
+Додай конструкцію if-else.
+Якщо isAdult дорівнює true, нехай програма напише: "Доступ дозволено. Гарного перегляду!".
+Інакше (в блоці else), нехай вона напише: "Доступ заборонено. Тобі має бути хоча б 18 років!".
+
+✅ Рішення:
+Console.WriteLine("Скільки тобі років?");
+string inputAge = Console.ReadLine() ?? "";
+int userAge = Convert.ToInt32(inputAge);
+
+bool isAdult = userAge >= 18;
+if(isAdult == true)
+{
+    Console.WriteLine("Доступ дозволено. Гарного перегляду!");
+} else
+{
+    Console.WriteLine("Доступ заборонено. Тобі має бути хоча б 18 років!");
+}
+
+
+
+Console.WriteLine("Який рівень кисню на борту у %?");
+int oxygenLevel = int.Parse(Console.ReadLine()!);
+Console.WriteLine("На яку відстань у млн км летимо?");
+int distance = int.Parse(Console.ReadLine()!);
+Console.WriteLine("Чи хворий капітан?");
+bool isCaptainSick = bool.Parse(Console.ReadLine()!);
+
+if(oxygenLevel <= 0 || oxygenLevel > 100)
+{
+    Console.WriteLine("Невірно введені умови рівня кисню");
+} else if(distance > 500)
+{
+    Console.WriteLine("Палива не вистачить. Політ неможливий");
+} else if (oxygenLevel < 10)
+{
+    Console.WriteLine("Тривога! Політ неможливий! Мало кисню!");
+} else if (isCaptainSick && distance < 50 && oxygenLevel > 90)
+{
+    Console.WriteLine("Капітан хворий. Автопілот увімкнено.");
+} else if (isCaptainSick == false && distance < 500 && oxygenLevel > 20)
+{
+    Console.WriteLine("Насолоджуйтеся польотом");
+} else
+{
+    Console.WriteLine("Політ скасовано");
+}
