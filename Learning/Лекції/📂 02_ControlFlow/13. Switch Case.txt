@@ -1,0 +1,74 @@
+Тема №13: Класичний Switch Case
+Теорія:
+switch порівнює змінну з набором значень (case). Це як багатоповерхове розгалуження. 
+Кожен блок обов'язково має закінчуватися словом break (вихід), інакше програма "провалиться" далі.
+
+📝 Завдання для довідника: "Світлофор"
+Умова:
+Запитай у користувача три кольори світлофора на вибір.
+Напиши конструкцію switch, яка:
+Якщо "Red" — виводить "Стій!".
+Якщо "Yellow" — виводить "Приготуйся!".
+Якщо "Green" — виводить "Йди!".
+Якщо будь-яке інше значення — виводить "Світлофор зламався".
+
+✅ Рішення:
+Console.WriteLine("Оберіть колір: \nRed \nYellow \nGreen");
+string color = Console.ReadLine()!;
+switch (color)
+{
+    case "Red":
+        Console.WriteLine("Стій!");
+        break;
+    case "Yellow":
+        Console.WriteLine("Приготуйся!");
+        break;
+    case "Green":
+        Console.WriteLine("Йди");
+        break;
+    default:
+        Console.WriteLine("Світлофор зламався");
+        break;
+}
+
+
+📝 Завдання: "Зоряний калькулятор"
+Уяви, що ти створюєш меню для космічного корабля. Користувач вводить номер операції.
+
+Твоя задача:
+Запитай у користувача два числа (типу double).
+Виведи меню:
+1 — Додавання
+2 — Віднімання
+3 — Множення
+4 — Ділення
+Зчитай вибір користувача (номер операції) у змінну int.
+Використовуючи switch, виконай відповідну арифметичну операцію.
+Додай default: якщо користувач ввів число не від 1 до 4, виведи повідомлення: «Такої команди не існує».
+
+✅ Рішення:
+Console.WriteLine("Введіть перше число");
+double num1 = double.Parse(Console.ReadLine()!);
+Console.WriteLine("Введіть друге число");
+double num2 = double.Parse(Console.ReadLine()!);
+Console.WriteLine("Виберіть дію: \n1 - Додавання \n2 - Віднімання \n3 - Множення \n4 - Ділення");
+int choiсe = int.Parse(Console.ReadLine()!);
+
+switch (choiсe)
+{
+    case 1:
+        Console.WriteLine($"Результат додавання: {num1} + {num2} = {num1 + num2}");
+        break;
+    case 2:
+        Console.WriteLine($"Результат віднімання: {num1} - {num2} = {num1 - num2}");
+        break;
+    case 3:
+        Console.WriteLine($"Результат множення: {num1} * {num2} = {num1 * num2}");
+        break;
+    case 4:
+        Console.WriteLine($"Результат ділення: {num1} / {num2} = {num1 / num2}");
+        break;
+    default:
+        Console.WriteLine("Такого пункту немає в меню");
+        break;
+}
