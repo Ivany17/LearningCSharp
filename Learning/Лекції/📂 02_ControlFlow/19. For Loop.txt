@@ -1,0 +1,188 @@
+Тема №19: Цикл із лічильником (For Loop) 🔄🔢
+Програмісти дуже часто використовують цикли саме для того, щоб щось порахувати (наприклад, від 1 до 10). 
+Цикл while, який ми вивчили, чудовий, але для лічильників є спеціальний, компактніший цикл — for.
+Він дозволяє записати створення лічильника, умову і його збільшення в одному рядку.
+
+⚠️ Як це виглядає:
+
+// (створення; умова; зміна)
+for (int i = 1; i <= 5; i++)
+{
+    Console.WriteLine($"Привіт №{i}");
+}
+
+int i = 1 — ми створюємо змінну-лічильник (зазвичай її називають просто i).
+i <= 5 — цикл працює, поки це правда.
+i++ — після кожного кола додаємо 1 до i.
+
+Це ніби "всі запчастини в одній коробці".
+
+📝 Завдання №19:
+Давай допоможемо школяру вивчити таблицю множення.
+Запитай у користувача будь-яке число (наприклад, 5) і конвертуй його в int number.
+Використай цикл for, щоб вивести таблицю множення цього числа на числа від 1 до 10.
+Результат у терміналі має виглядати приблизно так:
+5 * 1 = 5
+5 * 2 = 10
+...
+5 * 10 = 50
+Підказка: Всередині Console.WriteLine використай інтерполяцію $, де в одних фігурних дужках буде {i}, 
+а в інших — результат множення {number * i}.
+
+✅ Рішення:
+Console.WriteLine("Назви будь-яке число до 10 включно");
+string inputNumber = Console.ReadLine() ?? "";
+int number = Convert.ToInt32(inputNumber);
+
+for(int i = 1; i <= 10; i++)
+{
+    Console.WriteLine($"{number} * {i} = {number * i}");
+}
+
+📝 Завдання: "Прямокутник з зірочок "*""
+
+✅ Рішення:
+Console.WriteLine($"Яка висота вашого прямокутника?");
+int height = int.Parse(Console.ReadLine()!);
+Console.WriteLine($"Яка ширина вашого прямокутника?");
+int width = int.Parse(Console.ReadLine()!);
+
+for(int i = 0; i < height; i++)
+{
+    for(int j = 0; j < width; j++)
+    {
+        Console.Write("*");
+    }
+    Console.WriteLine();
+}
+
+
+📝 Завдання: "Прямокутний трикутник з зірочок "*""
+
+✅ Рішення:
+Console.WriteLine($"Яка висота вашого трикутника?");
+int height = int.Parse(Console.ReadLine()!);
+
+for(int i = 0; i < height; i++)
+{
+    for(int j = 0; j <= i; j++)
+    {
+        Console.Write("*");
+    }
+    Console.WriteLine();
+}
+
+📝 Завдання: "ПЕРЕВЕРНУТИЙ прямокутний трикутник з зірочок "*""
+
+✅ Рішення:
+Console.WriteLine($"Яка висота вашого трикутника?");
+int height = int.Parse(Console.ReadLine()!);
+
+for(int i = 0; i < height; i++)
+{
+    for(int j = i; j < height; j++)
+    {
+        Console.Write("*");
+    }
+    Console.WriteLine();
+}
+
+📝 Завдання: "малюємо напівромб ▶️"
+
+✅ Рішення:
+Console.WriteLine($"Яка висота вашого напівромба?");
+int height = int.Parse(Console.ReadLine()!);
+
+for(int i = 0; i < height; i++)
+{
+    for(int j = 0; j <= i; j++)
+    {
+        Console.Write("*");
+    }
+    Console.WriteLine();
+}
+for(int i = 1; i < height; i++) // змінюємо i = 1, аби найдовша ширина напівромба не повторювалася
+{
+    for(int j = i; j < height; j++)
+    {
+        Console.Write("*");
+    }
+    Console.WriteLine();
+}
+
+🎲 Фінальне завдання-бос: Те саме, але тепер "Малюємо рівнобедрений трикутник 🔺"
+
+✅ Рішення:
+Console.WriteLine($"Яка висота вашого трикутника?");
+int height = int.Parse(Console.ReadLine()!);
+
+for(int i = 0; i < height; i++)
+{
+    int spacesCount = height - i - 1;
+    int starsCount = 2 * i + 1;
+    for(int j = 0; j < spacesCount; j++)
+    {
+        Console.Write(" ");
+    }
+    for(int k = 0; k < starsCount; k++)
+    {
+        Console.Write("*");
+    }
+    Console.WriteLine();
+}
+
+🎲 Фінальне завдання-бос: Те саме, але тепер "Малюємо ПЕРЕВЕРНУТИЙ рівнобедрений трикутник 🔻"
+
+✅ Рішення:
+Console.WriteLine($"Яка висота вашого трикутника?");
+int height = int.Parse(Console.ReadLine()!);
+
+for(int i = 0; i < height; i++)
+{
+    int spacesCount = i;
+    int starsCount = 2 * (height - i) - 1;
+    for(int j = 0; j < spacesCount; j++)
+    {
+        Console.Write(" ");
+    }
+    for(int k = 0; k < starsCount; k++)
+    {
+        Console.Write("*");
+    }
+    Console.WriteLine();
+}
+
+🎲 Фінальне завдання-бос: Те саме, але тепер "З'єднуємо два рівнобедрених трикутника у ромб 🔶"
+
+✅ Рішення:
+Console.WriteLine($"Яка висота вашого ромба?");
+int height = int.Parse(Console.ReadLine()!);
+
+for(int i = 0; i < height; i++)
+{
+    int spacesCount = height - i - 1;
+    int starsCount = 2 * i + 1;
+    for(int j = 0; j < spacesCount; j++)
+    {
+        Console.Write(" ");
+    }
+    for(int k = 0; k < starsCount; k++)
+    {
+        Console.Write("*");
+    }
+    Console.WriteLine();
+}
+for(int i = 1; i < height; i++) // змінюємо i = 1, аби найдовша ширина ромба не повторювалася двічі
+{
+    int spacesCount = i;
+    int starsCount = 2 * (height - i) - 1;
+    for(int j = 0; j < spacesCount; j++)
+    {
+        Console.Write(" ");
+    }
+    for(int k = 0; k < starsCount; k++)
+    {
+        Console.Write("*");
+    }
+    Console.WriteLine();
+}
