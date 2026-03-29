@@ -1,0 +1,364 @@
+Тема №18: Цикли (While Loop) 🔄
+Уяви, що тобі потрібно вивести слово "Привіт" 100 разів. Писати сто разів WriteLine — це нудно і довго. 
+Програмісти для такого використовують цикли.
+Найпростіший цикл — це while (поки). Він повторює код доти, доки виконується певна умова.
+
+⚠️ Як це працює:
+Створюємо лічильник (коробку, яка рахує кроки).
+Пишемо while і умову.
+Всередині циклу обов'язково збільшуємо лічильник, інакше цикл буде тривати вічно!
+
+🔑 Приклад:
+int counter = 1; // Починаємо з одного
+
+while (counter <= 5) // Поки лічильник менше або дорівнює 5
+{
+    Console.WriteLine($"Крок №{counter}");
+    counter = counter + 1; // Збільшуємо на 1
+}
+
+‼️ До речі, замість counter = counter + 1 програмісти зазвичай пишуть коротше: counter++; (це означає те саме).
+
+📝 Завдання №18:
+Напишемо програму "Зворотний відлік до старту ракети".
+Створи змінну int timer і поклади туди число 10.
+Використай цикл while, щоб програма працювала, поки timer більший за 0.
+Всередині циклу:
+Виведи в термінал поточне значення таймера.
+Зменшуй таймер на одиницю (timer-- або timer = timer - 1).
+Після того, як цикл завершиться (за межами фігурних дужок), виведи фінальне: "Пуск! 🚀".
+
+✅ Рішення:
+int timer = 10;
+while(timer > 0)
+{
+    Console.WriteLine(timer);
+    timer--;
+}
+Console.WriteLine("Пуск! 🚀");
+
+📝 Завдання: "Гра: Вгадай число (версія з обмеженнями)"
+Це класика, але ми її ускладнимо.
+
+Умови:
+Генерація: Програма загадує одне випадкове число від 1 до 50.
+Цикл: Програма має питати у користувача варіант числа, поки він не вгадає.
+Підказки: Якщо введене число більше за загадане — пиши "Забагато!".
+Якщо менше — пиши "Замало!".
+Лічильник спроб: Створи змінну int attempts = 0;. Кожного разу, коли користувач вводить число, додавай до неї +1.
+Фінал: Коли користувач нарешті вгадав, цикл має завершитися, а програма — привітати його і сказати, скільки спроб йому знадобилося.
+
+💡 Наводка (алгоритм):
+Тобі знадобиться булева змінна (наприклад, isGuessed = false), яка буде умовою для while.
+Всередині циклу:
+Зчитуєш число (int.Parse(Console.ReadLine())).
+Збільшуєш лічильник.
+Через if / else if / else порівнюєш введене число із загаданим.
+Якщо вгадав — змінюєш isGuessed на true.
+
+✅ Рішення:
+int userGuess; // оголошуємо зміну заздалегідь
+Console.WriteLine("Вгадайте число від 1 до 50");
+bool isGuessed = false;
+Random generator = new Random();
+int result = generator.Next(1, 51);
+int attempts = 0;
+
+while (!isGuessed)
+{   // тут ми спочатку маємо перевірити, що користувач точно ввів число 
+    while(!int.TryParse(Console.ReadLine(), out userGuess)) // Поки ТryParse повертає false (не зміг розпізнати число)
+                                                        // out userGuess - Це спеціальний ключ. Він каже методу: 
+                                                        // "Якщо в тебе вийде перетворити текст на число, поклади результат прямо в мою змінну userGuess"
+    {
+        Console.WriteLine($"Це не число! Введіть число!");
+    }
+    if (userGuess > 50)
+    {
+        Console.WriteLine($"Число має бути меншим за 50");
+    } else if(userGuess > result)
+    {
+        Console.WriteLine($"Менше, ніж {userGuess}");
+    } else if (userGuess < result)
+    {
+        Console.WriteLine($"Більше, ніж {userGuess}");
+    }
+    else
+    {
+        isGuessed = true;
+    }
+    attempts++;
+}
+
+Console.WriteLine($"Нарешті! Це справді було число {result}! Аби вгадати його вам знадобилося {attempts} спроб!");
+
+📝 Завдання: "Таблиця множення (Рядок за рядком)"
+Ми не будемо малювати всю таблицю множення (це зазвичай роблять через цикл for), ми зробимо її через while, щоб ти відчув "механіку".
+
+Твоя задача:
+Користувач вводить число (наприклад, 5).
+Програма має вивести таблицю множення для цього числа від 1 до 10.
+АЛЕ: Після того, як програма вивела таблицю для одного числа, вона має запитати: "Бажаєте подивитись таблицю для іншого числа? (y/n)".
+
+Чому це "Цикл у циклі":
+Зовнішній цикл (while): Відповідає за те, щоб вся програма не закривалася (поки користувач не натисне 'n').
+Внутрішній цикл (while): Відповідає за те, щоб вивести 10 рядків множення (від 1 до 10) для конкретного числа.
+
+💡 План дій для тебе:
+Створи зовнішній цикл (як ми робили раніше з паролями).
+Всередині нього попроси користувача ввести число (можеш додати туди свою круту валідацію з TryParse, яку ми щойно вивчили!).
+Після того, як отримав число, створи лічильник для множення (наприклад, int multiplier = 1;).
+Запусти внутрішній цикл: while (multiplier <= 10).
+Всередині внутрішнього циклу просто виводь: {number} * {multiplier} = {number * multiplier}.
+Головне: Не забудь збільшувати multiplier++ всередині, інакше внутрішній цикл буде вічним!
+Додай обнулення multiplier = 1;. Це фундаментальне правило вкладених циклів: внутрішні змінні-лічильники мають 
+оновлюватися перед стартом внутрішнього циклу.
+
+✅ Рішення:
+int num;
+bool isCounting = true;
+int multiplier = 1;
+
+while (isCounting)
+{
+    Console.WriteLine("Введіть число, яке ви хочете помножити");
+
+    while(!int.TryParse(Console.ReadLine(), out num))
+    {
+        Console.WriteLine($"Це не число! Введіть, будь ласка, число.");
+    }
+
+    while(multiplier <= 10)
+    {
+        Console.WriteLine($"{num} * {multiplier} = {num * multiplier}");
+        multiplier++;
+    }
+    multiplier = 1; // обнулили лічильник (ВАЖЛИВО!)
+    Console.WriteLine($"Чи хочете ви порахувати інше число? y/n");
+    string answer = Console.ReadLine()!;
+    if(answer == "n") { isCounting =  false; }
+}
+
+🎲 Завдання-бос
+Ось класичне завдання, яке перевірить твою майстерність володіння while: "Малюємо прямокутник 🟥".
+
+Твоя задача:
+Користувач вводить ширину (наприклад, 5) і висоту (наприклад, 3).
+Програма має "намалювати" прямокутник символами *.
+
+Приклад виводу (для 5х3):
+*****
+*****
+*****
+
+Як це зробити через while?
+Зовнішній цикл рахує рядки (від 1 до висоти).
+Внутрішній цикл малює зірочки в одному рядку (від 1 до ширини).
+Підказка: Використовуй Console.Write("*") для зірочок і Console.WriteLine() 
+після завершення внутрішнього циклу, щоб перейти на новий рядок.
+
+✅ Рішення:
+Console.WriteLine("Введіть ширину");
+int width = int.Parse(Console.ReadLine()!);
+Console.WriteLine("Введіть висоту");
+int height = int.Parse(Console.ReadLine()!);
+int currentRow = 0; // лічильник рядків
+
+while (currentRow < height)
+{
+    int currentCol = 0; // лічильник стовпчиків
+    while (currentCol < width)
+    {
+        Console.Write("*");
+        currentCol++; // Переходимо до наступної зірочки
+    }
+    Console.WriteLine(); // Закінчили рядок — перейшли на новий
+    currentRow++; // Переходимо до наступного рядка
+}
+
+🎲 Фінальне завдання-бос: Те саме, але тепер "МАЛЮЄМО ПРЯМОКУТНИЙ ТРИКУТНИК 📐"
+Підказка (тільки логіка):
+У прямокутнику твій внутрішній цикл крутився до width (фіксоване число).
+А в трикутнику кількість зірочок у рядку залежить від номера самого рядка.
+Тобі не потрібна змінна width.
+Твій внутрішній цикл має працювати, поки currentCol менше (або дорівнює) currentRow.
+
+✅ Рішення:
+Console.WriteLine("Введіть висоту вашого трикутника");
+int height = int.Parse(Console.ReadLine()!);
+int currentRow = 0;
+
+while(currentRow < height)
+{
+    int currentCol = 0;
+    while (currentCol <= currentRow)
+    {
+        Console.Write("*");
+        currentCol++;
+    }
+    Console.WriteLine();
+    currentRow++;
+}
+
+🎲 Фінальне завдання-бос: Те саме, але тепер "Малюємо ПЕРЕВЕРНУТИЙ прямокутний трикутник 📐"
+
+✅ Рішення:
+Console.WriteLine("Введіть висоту вашого прямокутного трикутника");
+int height = int.Parse(Console.ReadLine()!);
+int currentRow = 0;
+
+while(currentRow < height)
+{
+    int currentCol = currentRow;
+
+    while(currentCol < height)
+    {
+        Console.Write("*");
+        currentCol++;
+    }
+    Console.WriteLine();
+    currentRow++;
+}
+
+📝 Завдання: "малюємо напівромб ▶️"
+
+✅ Рішення:
+Console.WriteLine("Введіть висоту вашого напівромба");
+int height = int.Parse(Console.ReadLine()!);
+int currentRow = 0;
+
+while(currentRow < height)
+{
+    int currentCol = 0;
+    while (currentCol <= currentRow)
+    {
+        Console.Write("*");
+        currentCol++;
+    }
+    Console.WriteLine();
+    currentRow++;
+}
+currentRow = 1; // Обнуляємо, аби найширша частина напівромба не дублювалася
+while(currentRow < height)
+{
+    int currentCol = currentRow;
+
+    while(currentCol < height)
+    {
+        Console.Write("*");
+        currentCol++;
+    }
+    Console.WriteLine();
+    currentRow++;
+}
+
+🎲 Фінальне завдання-бос: Те саме, але тепер "Малюємо рівнобедрений трикутник 🔺"
+
+✅ Рішення:
+Console.WriteLine("Введіть висоту вашого рівнобедреного трикутника");
+int height = int.Parse(Console.ReadLine()!);
+int currentRow = 0;
+
+while(currentRow < height)
+{
+    int spacesCount = height - currentRow - 1;
+    int starsCount = 2 * currentRow + 1;
+
+    int j = 0;
+    while(j < spacesCount)
+    {
+        Console.Write(" ");
+        j++;
+    }
+
+    int k = 0;
+    while(k < starsCount)
+    {
+        Console.Write("*");
+        k++;
+    }
+
+    Console.WriteLine();
+    currentRow++;
+}
+
+🎲 Фінальне завдання-бос: Те саме, але тепер "Малюємо ПЕРЕВЕРНУТИЙ рівнобедрений трикутник 🔻"
+
+✅ Рішення:
+Console.WriteLine("Введіть висоту вашого рівнобедреного трикутника");
+int height = int.Parse(Console.ReadLine()!);
+int currentRow = 0;
+
+while(currentRow < height)
+{
+    int spacesCount = currentRow;
+    int starsCount = 2 * (height - currentRow) - 1;
+
+    int j = 0;
+    while(j < spacesCount)
+    {
+        Console.Write(" ");
+        j++;
+    }
+
+    int k = 0;
+    while(k < starsCount)
+    {
+        Console.Write("*");
+        k++;
+    }
+
+    Console.WriteLine();
+    currentRow++;
+}
+
+🎲 Фінальне завдання-бос: Те саме, але тепер "З'єднуємо два рівнобедрених трикутника у ромб 🔶"
+
+✅ Рішення:
+Console.WriteLine("Введіть висоту вашого ромба");
+int height = int.Parse(Console.ReadLine()!);
+int currentRow = 0;
+while(currentRow < height)
+{
+    int spacesCount = height - currentRow - 1;
+    int starsCount = 2 * currentRow + 1;
+
+    int j = 0;
+    while(j < spacesCount)
+    {
+        Console.Write(" ");
+        j++;
+    }
+
+    int k = 0;
+    while(k < starsCount)
+    {
+        Console.Write("*");
+        k++;
+    }
+
+    Console.WriteLine();
+    currentRow++;
+}
+currentRow = 1; // Обнуляємо, аби найширша частина ромба не дублювалася
+while(currentRow < height)
+{
+    int spacesCount = currentRow;
+    int starsCount = 2 * (height - currentRow) - 1;
+
+    int j = 0;
+    while(j < spacesCount)
+    {
+        Console.Write(" ");
+        j++;
+    }
+
+    int k = 0;
+    while(k < starsCount)
+    {
+        Console.Write("*");
+        k++;
+    }
+
+    Console.WriteLine();
+    currentRow++;
+}
