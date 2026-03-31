@@ -1,0 +1,63 @@
+Тема №31: Інкапсуляція (Private та Public) 🔒🔓
+Зараз у твоїх класах усе позначено як public. Це означає, що будь-хто з будь-якого місця програми може залізти 
+в твій об'єкт і змінити йому рівень чи нікнейм (наприклад, написати myPlayer.level = -500;). 
+У великих іграх це небезпечно, бо може зламати логіку.
+
+Інкапсуляція — це приховування даних.
+
+🔒 private — дані доступні тільки всередині самого класу (код ззовні їх не бачить).
+🔓 public — дані відкриті для всіх.
+
+‼️ Важливо: зазвичай властивості роблять private, а для доступу до них створюють спеціальні методи.
+
+📝 Завдання №31:
+Давай захистимо рівень твого гравця.
+У класі Player зміни public int level на private int level.
+Тепер спробуй у верхній частині програми написати myPlayer.level = 20;. 
+Ти побачиш, що редактор підкреслить це червоним — доступ закритий! (Видали цей рядок після перевірки).
+Щоб ми все ж могли змінювати рівень за правилами, створи в класі Player метод:
+
+public void LevelUp() 
+{
+    this.level++;
+    Console.WriteLine($"Рівень піднято! Тепер рівень: {this.level}");
+}
+Виклич myPlayer.LevelUp(); у головній частині програми.
+
+✅ Рішення:
+Player myPlayer = new Player("IvanY1", 10);
+Admin myAdmin = new Admin("Ivan_Moderator", 99, "Moderator");
+myPlayer.Info();
+myAdmin.Info();
+//myPlayer.LevelUp = 20; помилка Cannot assign to 'LevelUp' because it is a 'method group'
+myPlayer.LevelUp();
+myPlayer.Info();
+
+class Player
+{
+    public string nickname = "NoName";
+    private int level; // змінюємо public на private аби ніхто ззовні не зміг змінити level
+    public Player(string userName, int userLevel)
+    {
+        nickname = userName;
+        level = userLevel;
+    }
+    public void Info()
+    {
+        Console.WriteLine($"Я гравець {this.nickname}, мій рівень {this.level}.");
+    }
+    public void LevelUp() 
+    {
+        this.level++;
+        Console.WriteLine($"Рівень піднято! Тепер рівень: {this.level}");
+    }
+}
+
+class Admin : Player
+{
+    public string Role { get; set; } = "Moderator";
+    public Admin(string userName, int userLevel, string adminRole) : base(userName, userLevel)
+    {
+        Role = adminRole;
+    }
+}
