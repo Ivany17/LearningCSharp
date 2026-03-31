@@ -1,0 +1,55 @@
+Тема №29: Наслідування (Inheritance) 🧬
+Уяви, що ти розширюєш свою гру. Крім звичайних гравців, тобі потрібні Адміни. 
+У адміна мають бути ті ж самі властивості, що й у гравця (нікнейм, рівень), але додається ще щось своє — наприклад, назва відділу модерації.
+
+Замість того, щоб копіювати весь код із класу Player, ми можемо використати наслідування. 
+Клас-нащадок просто «забирає» собі все, що є у батька.
+
+⚠️ Як це працює:
+Ми ставимо двокрапку : після назви нового класу.
+
+class Admin : Player // Адмін наслідує все від Гравця
+{
+    public string section;
+
+    // Конструктор адміна (base передає дані в конструктор батька)
+    public Admin(string name, int lvl, string sec) : base(name, lvl)
+    {
+        section = sec;
+    }
+}
+
+📝 Завдання №29:
+Давай створимо ієрархію персонажів.
+Додай під своїм класом Player новий клас Admin, який наслідує Player.
+Додай у клас Admin нову властивість: public string role;.
+Створи конструктор для Admin, який приймає три параметри (name, lvl, role) і передає перші два в base.
+У верхній частині програми створи об'єкт адміна:
+Admin myAdmin = new Admin("Ivan_Moderator", 99, "Moderator");
+Виведи в консоль: "Адмін: {myAdmin.nickname}, Роль: {myAdmin.role}".
+
+✅ Рішення:
+Player myPlayer = new Player("IvanY1", 10);
+Admin myAdmin = new Admin("Ivan_Moderator", 99, "Moderator");
+Console.WriteLine($"Гравець: {myPlayer.nickname}, Рівень: {myPlayer.level}");
+Console.WriteLine($"Адмін: {myAdmin.nickname}, Роль: {myAdmin.role}");
+
+class Player
+{
+    public string nickname = "NoName";
+    public int level;
+    public Player(string userName, int userLevel)
+    {
+        nickname = userName;
+        level = userLevel;
+    }
+}
+
+class Admin : Player
+{
+    public string Role { get; set; } = "Moderator";
+    public Admin(string userName, int userLevel, string adminRole) : base(userName, userLevel)
+    {
+        Role = adminRole;
+    }
+}
