@@ -130,4 +130,4 @@ foreach(int[] row in sales)
     Console.WriteLine();
 }
 Console.WriteLine($"Загальний виторг за 3 дні: {sum} грн");
-Console.WriteLine($"У нас усього {count} чеки, сума яких перевищує 100 грн");
+Console.WriteLine($"У нас усього {count} чеки, сума яких перевищує 100 грн"); 
