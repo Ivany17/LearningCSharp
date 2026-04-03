@@ -1,0 +1,78 @@
+Тема №32: Властивості (Properties: get та set) 🔑
+Програмісти C# придумали ще зручніший спосіб контролювати доступ до даних, ніж просто створювати окремі методи. 
+Це Properties (Властивості). Вони виглядають як звичайні змінні, але всередині мають логіку перевірки.
+
+⚠️ Як це працює:
+Ми використовуємо get (взяти) та set (встановити).
+private int health = 100;
+public int Health
+{
+    get { return health; }
+    set 
+    { 
+        if (value > 0) health = value; // Перевірка: здоров'я не може бути від'ємним
+    }
+}
+value — це спеціальне слово, яке означає те число, яке ми намагаємося записати.
+
+Тепер ми можемо писати player.Health = 50;, і всередині автоматично спрацює перевірка set.
+
+📝 Завдання №32:
+Давай зробимо так, щоб рівень гравця не міг стати меншим за 1.
+У класі Player створи властивість Level (з великої літери).
+У get просто повертай приватну змінну level.
+У set додай умову: якщо value > 0, то записуй значення у level. Інакше виведи повідомлення: "Помилка! Рівень має бути позитивним".
+У конструкторі класу тепер замість this.level = userLevel; використовуй властивість: this.Level = userLevel;.
+Спробуй у головній програмі навмисно написати myPlayer.Level = -5; і подивися, що скаже термінал.
+
+✅ Рішення:
+Player myPlayer = new Player("IvanY1", 10);
+Admin myAdmin = new Admin("Ivan_Moderator", 99, "Moderator");
+myPlayer.Info();
+myAdmin.Info();
+myPlayer.Level = -5; // після запуску коду за допомогою dotnet run в терміналі має бути повідомлення "Помилка! Рівень має бути більше нуля!"
+
+class Player
+{
+    public string nickname = "NoName";
+    private int level;
+    public int Level
+    {
+        get { return level; }
+        set
+        {
+            if(value > 0)
+            {
+                level = value;
+            } else
+            {
+                Console.WriteLine("Помилка! Рівень має бути більше нуля!");
+            }
+        }
+    }
+    public Player(string userName, int userLevel)
+    {
+        nickname = userName;
+        Level = userLevel;
+    }
+    public void Info()
+    {
+        Console.WriteLine($"Я гравець {this.nickname}, мій рівень {this.level}.");
+    }
+    public void LevelUp() 
+    {
+        this.level++;
+        Console.WriteLine($"Рівень піднято! Тепер рівень: {this.level}");
+    }
+}
+
+class Admin : Player
+{
+    public string Role { get; set; } = "Moderator";
+    public Admin(string userName, int userLevel, string adminRole) : base(userName, userLevel)
+    {
+        Role = adminRole;
+    }
+}
+
+
