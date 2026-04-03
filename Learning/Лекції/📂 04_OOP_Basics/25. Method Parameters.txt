@@ -1,0 +1,74 @@
+Тема №25: Параметри методів (Method Parameters) 📥
+Зараз твій метод ShowAlert завжди робить одне й те саме. Але методи стають набагато кориснішими, 
+якщо ми можемо передавати їм якісь дані (параметри), як у функцію.
+
+⚠️ Як це працює:
+Ми вказуємо в дужках назву змінної, яку метод отримає "на вхід".
+
+🔑 Приклад:
+static void GreetUser(string name) 
+{
+    Console.WriteLine($"Привіт, {name}!");
+}
+
+Тепер при виклику ми повинні дати йому це ім'я: GreetUser("Іван");.
+
+📝 Завдання №25:
+Давай зробимо метод для привітання гравців.
+Створи метод WelcomePlayer, який приймає один параметр: string playerName.
+Всередині методу виведи: "Ласкаво просимо до гри, {playerName}!".
+У головній програмі виклич цей метод двічі з різними іменами (наприклад, своїм та друга).
+
+✅ Рішення:
+WelcomePlayer("Іван");
+WelcomePlayer("Валерія");
+
+static void WelcomePlayer(string playerName)
+{
+    Console.WriteLine($"Ласкаво просимо до гри, {playerName}!");
+}
+
+📝 Завдання №2: "Кольоровий принтер"
+Давай зробимо метод більш універсальним. Створи метод PrintColorMessage, який прийматиме два параметри: текст і колір.
+Метод має виглядати так: void PrintColorMessage(string message, ConsoleColor color).
+Всередині методу:
+Встанови Console.ForegroundColor у той колір, який прийшов у параметрі.
+Виведи повідомлення.
+Скинь колір.
+Виклич цей метод у коді тричі з різними кольорами:
+Один раз із ConsoleColor.Green (наприклад, "Успішно!").
+Один раз із ConsoleColor.Yellow (наприклад, "Попередження...").
+Один раз із ConsoleColor.Blue (наприклад, "Інформація").
+
+✅ Рішення:
+PrintColorMessage("Успішно!", ConsoleColor.Green);
+PrintColorMessage("Попередження...", ConsoleColor.Yellow);
+PrintColorMessage("Інформація", ConsoleColor.Blue);
+
+void PrintColorMessage(string message, ConsoleColor color) // оскільки ми працюємо без Main і Program (Top-statement) - static void не потрібен
+{
+    Console.ForegroundColor = color;
+    Console.WriteLine($"{message}");
+    Console.ResetColor();
+}
+
+📝 Завдання: "Калькулятор площі"
+Тобі потрібно створити метод, який допомагає будівельнику швидко рахувати площу прямокутних кімнат.
+Створи метод CalculateArea, який приймає два параметри типу double: довжину (width) та висоту (height).
+Всередині методу:
+Створи змінну double area = width * height;.
+Виведи результат у консоль у зручному форматі: "Площа кімнати: [результат] м²".
+Виклич цей метод у коді тричі з різними значеннями (наприклад: 5.5 і 3.0, 10.2 і 5.0, тощо).
+
+✅ Рішення:
+CalculateArea(5.5, 3.0);
+CalculateArea(10.2, 5.0);
+CalculateArea(7.4, 4.6);
+
+void CalculateArea(double width, double height)
+{
+    double area = width * height;
+    Console.ForegroundColor = ConsoleColor.DarkCyan;
+    Console.WriteLine($"Площа кімнати: {area} м²");
+    Console.ResetColor();
+}
