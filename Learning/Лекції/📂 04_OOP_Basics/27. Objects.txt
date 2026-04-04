@@ -1,0 +1,112 @@
+Тема №27: Знайомство з об'єктами (Introduction to Objects) 🚗
+Ми навчилися створювати методи, але в реальному світі програмування ми створюємо об'єкти. Об'єкт — це щось, 
+що має свої характеристики (властивості) та вміння (методи).
+Уяви, що ми створюємо гру про машини. Замість того, щоб просто писати код, ми можемо створити клас Car.
+
+🚗 Властивості: модель, колір, швидкість.
+🚨 Методи: їхати, гальмувати, сигналити.
+
+Це дозволяє нам створити одну "машину", а потім просто копіювати її, змінюючи лише колір чи назву.
+
+📝 Завдання №27:
+Давай спробуємо створити структуру для твого персонажа в грі.
+Створи клас з назвою Player (він має бути за межами методу Main, але всередині Program).
+Додай у нього дві властивості:
+
+public string nickname;
+public int level;
+
+У методі Main створи самого гравця:
+
+Player myPlayer = new Player();
+
+Присвой йому значення:
+
+myPlayer.nickname = "IvanY1";
+myPlayer.level = 10;
+
+Виведи в консоль: "Гравець: {myPlayer.nickname}, Рівень: {myPlayer.level}".
+
+✅ Рішення:
+Player myPlayer = new Player();
+myPlayer.nickname = "IvanY1";
+myPlayer.level = 10;
+Console.WriteLine($"Гравець: {myPlayer.nickname}, Рівень: {myPlayer.level}");
+
+class Player
+{
+    public string nickname = "NoName"; // додаємо (= "NoName") аби зникли жовті рядки помилок
+    public int level;
+}
+
+📝 Завдання №2: Методи всередині об'єктів
+Зараз твої об'єкти — це просто набори даних (пасивні). Але справжні об'єкти вміють діяти. Дії об'єкта в коді називаються Методами класу.
+Давай навчимо нашого гравця представлятися самостійно.
+Додай всередині класу Player метод public void Greet().
+Всередині цього методу напиши:
+Console.WriteLine($"Привіт, я {Nickname}, мій рівень: {Level}");
+В основному коді: замість того, щоб писати довгий Console.WriteLine вручну, просто виклич метод у кожного гравця:
+player1.Greet();
+player2.Greet();
+
+✅ Рішення:
+Player player1 = new Player();
+player1.Nickname = "Till";
+player1.Level = 9;
+player1.Greet();
+
+Player player2 = new Player();
+player2.Nickname = "Paul";
+player2.Level = 12;
+player2.Greet();
+
+class Player
+{
+    public string Nickname = "";
+    public int Level;
+    public void Greet()
+    {
+        Console.WriteLine($"Привіт, я {Nickname}, мій рівень: {Level}");
+    }
+}
+
+📝 Завдання №3: Параметри в методах класу
+Методи всередині класів можуть приймати параметри точно так само, як і звичайні методи, які ми вчили раніше.
+Давай зробимо гру трохи інтерактивнішою. Навчимо гравця отримувати досвід (XP).
+Додай у клас Player нове поле: public int Experience = 0;.
+Додай у клас новий метод public void GainExperience(int amount).
+Всередині цього методу:
+Збільшуй Experience на отримане значення amount.
+Виводь повідомлення: "{Nickname} отримав {amount} XP! Всього: {Experience}".
+В основному коді: викликай цей метод для своїх гравців кілька разів із різними числами.
+
+✅ Рішення:
+Player player1 = new Player();
+player1.Nickname = "Till";
+player1.Level = 9;
+player1.Greet();
+player1.GainExperience(35);
+player1.GainExperience(15);
+
+Player player2 = new Player();
+player2.Nickname = "Paul";
+player2.Level = 12;
+player2.Greet();
+player2.GainExperience(40);
+player2.GainExperience(23);
+
+class Player
+{
+    public string Nickname = "";
+    public int Level;
+    public int Experience = 0;
+    public void GainExperience(int amount)
+    {
+        Experience += amount;
+        Console.WriteLine($"{Nickname} отримав {amount} XP! Всього: {Experience}");
+    }
+    public void Greet()
+    {
+        Console.WriteLine($"Привіт, я {Nickname}, мій рівень: {Level}");
+    }
+}
