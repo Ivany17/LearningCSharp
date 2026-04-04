@@ -1,0 +1,104 @@
+Тема №26: Методи, що повертають значення (Return Values) 🔙
+Досі всі твої методи були типу static void. Слово void означає «порожнеча» — метод просто виконує дію 
+(наприклад, пише в консоль) і нічого не віддає назад у програму.
+Але часто нам потрібно, щоб метод щось обчислив і повернув нам результат, який ми зможемо використати далі.
+
+⚠️ Як це працює:
+Замість void ми пишемо тип даних, який хочемо отримати (наприклад, int або double).
+В кінці методу використовуємо ключове слово return.
+
+🔑 Приклад:
+static int Square(int number) 
+{
+    return number * number; // Повертаємо результат множення
+}
+
+Тепер ми можемо зберегти цей результат у змінну: int result = Square(5); (у result запишеться 25).
+
+📝 Завдання №26:
+Давай створимо метод для підрахунку ціни зі знижкою.
+Створи метод GetDiscountPrice, який приймає double price.
+Метод має бути типу double (замість void).
+Всередині методу поверни (return) ціну, зменшену на 20%.
+Підказка: помнож ціну на 0.8: return price * 0.8;
+У головній програмі:
+Створи змінну double originalPrice = 100;.
+Виклич свій метод і збережи результат у нову змінну double finalPrice.
+Виведи в термінал: "Ціна зі знижкою: {finalPrice}".
+
+✅ Рішення:
+double originalPrice = 100;
+double finalPrice = GetDiscountPrice(originalPrice);
+Console.WriteLine($"Ціна зі знижкою: {finalPrice}");
+
+static double GetDiscountPrice(double price)
+{
+    return price * 0.8;
+}
+
+📝 Завдання №2: Логіка в поверненні значень
+Давай додамо в метод трохи логіки. Уяви, що у нас є фіксована комісія за обмін.
+Метод ConvertToUah має два параметри: double dollars та double exchangeRate (курс).
+Всередині методу:
+Порахуй суму: dollars * exchangeRate.
+Відніми від результату комісію (наприклад, 100 грн).
+Поверни (return) фінальну суму.
+Виклик: У основному коді виклич цей метод з різними курсами (наприклад, 40.5 та 41.0) і виведи фінальні суми на екран.
+
+✅ Рішення:
+double myMoney = ConvertToUah(1000, 40.5);
+Console.WriteLine($"У мене є {myMoney} грн");
+
+double ConvertToUah(double dollars, double exchangeRate)
+{
+    double sum = dollars * exchangeRate;
+    double finalSum = sum - 100;
+    return finalSum;
+}
+
+📝 Завдання №3: Метод із логічною перевіркою
+Давай закріпимо роботу return як "виходу" за допомогою умови. Створимо метод для перевірки віку для входу в клуб.
+Створи метод CheckAccess, який повертає рядок (string) і приймає параметр int age.
+Всередині методу:
+Якщо age менше 18, метод має одразу повернути рядок: "Доступ заборонено!".
+Якщо ж вік достатній, метод має повернути рядок: "Ласкаво просимо!".
+Виклик: Виклич цей метод два рази з різним віком і виведи результати в консоль.
+
+✅ Рішення:
+Console.WriteLine(CheckAccess(13));
+Console.WriteLine(CheckAccess(21));
+
+string CheckAccess(int age)
+{
+    if(age < 18) return "Доступ заборонено!";
+    return "Ласкаво просимо!";
+}
+
+🏁 Фінальне завдання Boolean Methods: "Метод-валідатор"
+Створи метод IsEven, який приймає число int number.
+Метод має повертати тип bool.
+Усередині методу: поверни true, якщо число парне (ділиться на 2 без остачі %), і false, якщо ні.
+У Main:
+Запитай у користувача число.
+Використай свій метод прямо в умові: if (IsEven(userNumber)) { ... }.
+Якщо true — виведи зеленим "Число парне", якщо false — червоним "Число непарне".
+
+Console.WriteLine("Введіть ваше число");
+int userNumber = int.Parse(Console.ReadLine()!);
+if (IsEven(userNumber))
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Число парне");
+    Console.ResetColor();
+} else
+{
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine("Число непарне");
+    Console.ResetColor();
+}
+
+bool IsEven(int number)
+{
+    if(number % 2 == 0) return true;
+    else return false;
+}
