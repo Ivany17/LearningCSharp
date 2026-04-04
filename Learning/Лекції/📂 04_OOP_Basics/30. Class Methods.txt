@@ -180,4 +180,4 @@ class Courier
         parcel.IsDelivered = true;
         Console.WriteLine($"Кур'єр {Name} доставив посилку: {parcel.Description}");
     }
-}
+} 
