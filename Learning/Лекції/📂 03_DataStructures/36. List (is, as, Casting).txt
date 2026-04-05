@@ -1,0 +1,151 @@
+Тема №36: Перевірка типів (is, as, Casting) 📘
+Коли ми працюємо зі списком об'єктів різних класів (як твій List<Vehicle>), програма бачить їх як "узагальнений транспорт". 
+Але іноді нам потрібно розрізнити їх, щоб отримати доступ до специфічних властивостей.
+
+🧩 1. Оператор is (Перевірка)
+Це питання: "Чи є цей об'єкт електрокаром?". Повертає true або false.
+if (car is ElectricCar) 
+{
+    // Так, це електрокар!
+}
+
+🏎️ 2. Оператор as (М'яке приведення)
+Це спроба: "Спробуй ставитися до цього об'єкта як до електрокара". Якщо це не він — ми отримаємо null (пустоту), і програма не "впаде".
+ElectricCar ev = car as ElectricCar;
+if (ev != null)
+{
+    Console.WriteLine(ev.BatteryLevel);
+}
+
+⚡ 3. Pattern Matching (Найсучасніший спосіб)
+Це поєднання перевірки та створення змінної в один рядок. Саме цей спосіб зараз вважається найкращим у C#.
+if (car is ElectricCar ev) 
+{
+    // Програма сама перевірила, що це електрокар, 
+    // і створила тимчасову змінну 'ev', щоб ти міг нею користуватися.
+    Console.WriteLine($"Заряд: {ev.BatteryLevel}%");
+}
+
+📝 Завдання №36:
+Давай модифікуємо твій поточний код, щоб додати в нього "інтелектуальну діагностику".
+Твій алгоритм дій:
+У списку garage залиш як звичайні Car, так і ElectricCar.
+У циклі foreach (var car in garage) залиш виклик car.Drive().
+Одразу під ним додай перевірку через Pattern Matching (спосіб №3):
+ЯКЩО машина є електрокаром (ElectricCar), виведи в консоль: "Батарея заряджена на {BatteryLevel}%".
+ЯКЩО машина є звичайною (Car), виведи: "Тип палива: Бензин".
+Додай у клас Car (звичайний) метод: public void ChangeOil(). Нехай він виводить: "Заміна масла для {Brand} проведена".
+Додай у клас ElectricCar метод: public void CheckBattery(). Нехай він виводить: "Діагностика батареї для {Brand} завершена".
+У Main всередині циклу foreach (var car in garage) зроби наступне:
+Використай is з паттерном (той короткий запис if (car is ElectricCar ev)), щоб викликати CheckBattery().
+Використай as (через окрему змінну та if != null), щоб викликати ChangeOil() для звичайних машин.
+
+✅ Рішення:
+using System.Collections.Generic;
+
+List<Vehicle> garage = new List<Vehicle>();
+garage.Add(new Car("BMW", 230, 45));
+garage.Add(new Car("Audi", 210, 52));
+garage.Add(new ElectricCar("Tesla", 190, 78));
+garage.Add(new ElectricCar("Nissan Leaf", 160, 41));
+
+foreach(var car in garage)
+{
+    car.Drive();
+    if(car is ElectricCar ev)
+    {
+        Console.WriteLine($"Батарея заряджена на {ev.BatteryLevel}%");
+    } else
+    {
+        Console.WriteLine("Тип палива: Бензин");
+    }
+}
+
+// те саме, але через as
+// foreach(var car in garage)
+// {
+//     car.Drive();
+//     ElectricCar ev = car as ElectricCar;
+//     if(ev != null)
+//     {
+//         Console.WriteLine($"Батарея заряджена на {ev.BatteryLevel}%");
+//     } else
+//     {
+//         Console.WriteLine("Тип палива: Бензин");
+//     }
+// }
+
+// те саме, але спрощений варіант через if / else, особливо якщо у нас багато різних класів
+foreach(var car in garage)
+// {
+//     car.Drive();
+//     if(car is ElectricCar ev)
+//     {
+//         Console.WriteLine($"Батарея заряджена на {ev.BatteryLevel}%");
+//         ev.ChekBattery();
+//     } else if (car is Car petrolCar)
+//     {
+//         Console.WriteLine("Тип палива: Бензин");
+//         petrolCar.ChangeOil();
+//     } else
+//     {
+//         Console.WriteLine("Цей транспорт не потребує специфічного обслуговування");
+//     }
+// }
+
+class Vehicle
+{
+    public string Brand { get; private set; }
+    public int Speed { get; private set; }
+    public static double TotalSpeed = 0; // static
+    public static int VehicleCount = 0; // static
+    public static List<string> AllVehicleModels = new List<string>(); // static
+    public Vehicle(string Brand, int Speed)
+    {
+        this.Brand = Brand;
+        this.Speed = Speed;
+        VehicleCount++; //static
+        AllVehicleModels.Add(Brand);
+    }
+    public void Drive()
+    {
+        Console.WriteLine($"Транспорт {Brand} їде зі швидкістю {Speed} км/год");
+    } 
+}
+
+class Car : Vehicle
+{
+    private int Fuel;
+    public int FuelLevel 
+    { 
+        get { return Fuel; } // Дозволяємо читати приватне поле
+    }
+    public Car(string Brand, int Speed, int Fuel) : base(Brand, Speed)
+    {
+        this.Fuel = Fuel;
+    }
+    public void ShowFuel()
+    {
+        Console.WriteLine($"Палива залишилось: {Fuel}");
+    }
+    public void Refuel(int amount)
+    {
+        if(amount > 0)
+        {
+            Fuel += amount;
+            Console.WriteLine($"Машина {Brand} заправлена до {Fuel}");
+        } else
+        {
+            Console.WriteLine("Помилка! Неможливо заправити від'ємну кількість");
+        }
+    }
+}
+
+class ElectricCar : Vehicle
+{
+    public int BatteryLevel { get; private set; }
+    public ElectricCar(string Brand, int Speed, int BatteryLevel) : base(Brand, Speed)
+    {
+        this.BatteryLevel = BatteryLevel;
+    }
+}
