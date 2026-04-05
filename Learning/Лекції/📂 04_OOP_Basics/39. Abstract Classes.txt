@@ -1,0 +1,137 @@
+Тема №39: Абстрактні класи (Abstract Classes) 🏛️
+🏗️ Що це таке?
+Абстрактний клас — це "ідея" або "недобудована модель". Це клас, який заборонено перетворювати на об'єкт. 
+Ти не можеш купити в магазині "просто фрукт" — ти купуєш або яблуко, або банан. Так і в коді: Vehicle стає абстрактною ідеєю транспорту.
+
+📝 Головні правила:
+Заборона new: Ти більше не зможеш написати new Vehicle(). Це видасть помилку.
+Абстрактні методи (abstract): Ти можеш створити метод без тіла (як в інтерфейсі). Це змушує всіх "дітей" обов'язково його реалізувати.
+Гнучкість: На відміну від інтерфейсу, абстрактний клас може мати звичайні змінні, конструктори та готові методи з кодом.
+
+🎯 Навіщо це потрібно?
+Щоб уникнути помилок (хтось випадково створить "пусту" машину без двигуна).
+Щоб гарантувати, що кожен нащадок реалізує критично важливі функції (наприклад, кожна машина мусить мати метод Refuel, 
+але заправляються вони всі по-різному).
+
+📝 Завдання №39: "Архітектор Гаража"
+Давай перетворимо твій базовий клас на професійний фундамент.
+Зроби клас абстрактним: Додай слово abstract перед class Vehicle.
+Створи абстрактний метод: Видали тіло методу Drive() у Vehicle і зроби його абстрактним:
+public abstract void Drive(); (Зверни увагу: тепер там немає дужок { }, лише крапка з комою).
+Перевір "дітей": Оскільки Drive() став абстрактним, твої Car та ElectricCar зобов'язані мати override void Drive(). 
+(Вони у тебе вже є, тож тут усе буде ок).
+Спробуй зламати систему: У Main спробуй створити об'єкт самого Vehicle:
+Vehicle v = new Vehicle("Test", 100);
+
+✅ Рішення:
+Vehicle v = new Vehicle("Test", 100); // error CS0144: Cannot create an instance of the abstract type or interface 'Vehicle'
+
+List<Vehicle> garage = new List<Vehicle>();
+garage.Add(new Car("BMW", 230, 45));
+garage.Add(new ElectricCar("Tesla", 190, 78));
+
+foreach(var car in garage)
+{
+    car.Drive(); // Polymorphism
+    if(car is ElectricCar ev)
+    {
+        Console.WriteLine($"Батарея заряджена на {ev.BatteryLevel}%");
+        ev.ChekBattery();
+        ev.Stop(); // Interface
+    } else if (car is Car petrolCar)
+    {
+        Console.WriteLine("Тип палива: Бензин");
+        petrolCar.ChangeOil();
+        petrolCar.Stop(); // Interface
+    } else
+    {
+        Console.WriteLine("Цей транспорт не потребує специфічного обслуговування");
+    }
+}
+
+// List<IStoppable> emergencyList = new List<IStoppable>();
+// emergencyList.Add(new Car("BMW", 230, 45));
+// emergencyList.Add(new ElectricCar("Tesla", 190, 78));
+// foreach(var stop in emergencyList)
+// {
+//     stop.Stop();
+// }
+
+interface IStoppable // Interface
+{
+    void Stop();
+}
+
+abstract class Vehicle : IStoppable
+{
+    public string Brand { get; private set; }
+    public int Speed { get; private set; }
+    public static double TotalSpeed = 0; // static
+    public static int VehicleCount = 0; // static
+    public static List<string> AllVehicleModels = new List<string>(); // static
+    public Vehicle(string Brand, int Speed)
+    {
+        this.Brand = Brand;
+        this.Speed = Speed;
+        VehicleCount++; //static
+        AllVehicleModels.Add(Brand);
+    }
+    public abstract void Drive(); // Abstract Classes
+    public void Stop()
+    {
+        Console.WriteLine("Транспорт зупинився");
+    }
+}
+
+class Car : Vehicle, IStoppable
+{
+    private int Fuel;
+    public int FuelLevel 
+    { 
+        get { return Fuel; } // Дозволяємо читати приватне поле
+    }
+    public Car(string Brand, int Speed, int Fuel) : base(Brand, Speed)
+    {
+        this.Fuel = Fuel;
+    }
+    public void ShowFuel()
+    {
+        Console.WriteLine($"Палива залишилось: {Fuel}");
+    }
+    public void Refuel(int amount)
+    {
+        if(amount > 0)
+        {
+            Fuel += amount;
+            Console.WriteLine($"Машина {Brand} заправлена до {Fuel}");
+        } else
+        {
+            Console.WriteLine("Помилка! Неможливо заправити від'ємну кількість");
+        }
+    }
+    public void ChangeOil()
+    {
+        Console.WriteLine($"Заміна масла для {Brand} проведена");
+    }
+    public override void Drive()
+    {
+        Console.WriteLine($"Машина {Brand} гуде мотором на швидкості {Speed} км/год");
+    }
+}
+
+class ElectricCar : Vehicle, IStoppable
+{
+    public int BatteryLevel { get; private set; }
+    public ElectricCar(string Brand, int Speed, int BatteryLevel) : base(Brand, Speed)
+    {
+        this.BatteryLevel = BatteryLevel;
+    }
+    public void ChekBattery()
+    {
+        Console.WriteLine($"Діагностика батареї для {Brand} завершена");
+    }
+    public override void Drive()
+    {
+        Console.WriteLine($"Електрокар {Brand} безшумно їде зі швидкістю {Speed} км/год");
+    }
+}

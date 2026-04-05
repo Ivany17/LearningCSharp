@@ -1,0 +1,183 @@
+Тема №30: Методи всередині класів (Class Methods) 🏃‍♂️
+Клас — це не тільки контейнер для даних (властивостей). Це ще й набір дій, які об'єкт може виконувати.
+Зараз твій Player просто зберігає дані. Давай навчимо його вітатися самостійно. Якщо метод прописаний у класі, 
+він має доступ до всіх властивостей цього класу за допомогою слова this.
+
+🔑 Приклад:
+class Player
+{
+    public string nickname;
+    public void Greet() // Метод без static
+    {
+        Console.WriteLine($"Привіт! Я {this.nickname}.");
+    }
+}
+Зверни увагу: ми прибрали слово static. Це означає, що метод належить конкретному об'єкту (екземпляру), а не всьому класу загалом. Тепер ми викликаємо його так: myPlayer.Greet();.
+
+📝 Завдання №30:
+Навчимо твоїх персонажів говорити.
+Додай у клас Player метод з назвою Info.
+Всередині методу виведи повідомлення: "Я гравець {nickname}, мій рівень {level}.".
+Виклич цей метод для об'єкта myPlayer.
+Виклич цей же метод для об'єкта myAdmin (пам'ятай, що адмін наслідує все від гравця!).
+
+✅ Рішення:
+Player myPlayer = new Player("IvanY1", 10);
+Admin myAdmin = new Admin("Ivan_Moderator", 99, "Moderator");
+myPlayer.Info();
+myAdmin.Info();
+
+class Player
+{
+    public string nickname = "NoName";
+    public int level;
+    public Player(string userName, int userLevel)
+    {
+        nickname = userName;
+        level = userLevel;
+    }
+    public void Info()
+    {
+        Console.WriteLine($"Я гравець {this.nickname}, мій рівень {this.level}.");
+    }
+}
+
+class Admin : Player
+{
+    public string Role { get; set; } = "Moderator";
+    public Admin(string userName, int userLevel, string adminRole) : base(userName, userLevel)
+    {
+        Role = adminRole;
+    }
+}
+
+📝 Завдання: Станція техобслуговування
+Створи один батьківський клас Vehicle і два класи Car і ElectricCar, які успадковується від нього.
+Створи новий клас ServiceStation (просто окремий клас внизу, він ні від кого не успадковується).
+Додай у нього метод Refuel(Car car):
+Він приймає об'єкт типу Car.
+Всередині: car.Fuel = 100;
+Виводить: "Машина {car.Brand} заправлена бензином!".
+Додай у нього метод Charge(ElectricCar ev):
+Він приймає об'єкт типу ElectricCar.
+Всередині: ev.BatteryLevel = 100;
+Виводить: "Машина {ev.Brand} заряджена до 100%!".
+У Main:
+Створи об'єкт станції: ServiceStation station = new ServiceStation();.
+Спершу виведи поточне паливо BMW та заряд Tesla (щоб бачити, що вони не повні).
+Відправ їх на сервіс:
+station.Refuel(bmw);
+station.Charge(tesla);
+Знову виведи їхні показники, щоб переконатися, що об'єкт станції реально змінив дані всередині об'єктів авто.
+
+✅ Рішення:
+ServiceStation station = new ServiceStation();
+Car bmw = new Car("BMW", 230, 45);
+bmw.Drive();
+ElectricCar tesla = new ElectricCar("Tesla", 200, 78);
+tesla.Drive();
+Console.WriteLine($"До сервісу: BMW паливо = {bmw.Fuel}, Tesla заряд = {tesla.BatteryLevel}%");
+station.Refuel(bmw);
+station.Charger(tesla);
+Console.WriteLine($"Після сервісу: BMW паливо = {bmw.Fuel}, Tesla заряд = {tesla.BatteryLevel}%");
+
+class Vehicle
+{
+    public string Brand;
+    public int Speed;
+    public Vehicle(string Brand, int Speed)
+    {
+        this.Brand = Brand;
+        this.Speed = Speed;
+    }
+    public void Drive()
+    {
+        Console.WriteLine($"Транспорт {Brand} їде зі швидкістю {Speed} км/год");
+    }
+}
+
+class Car : Vehicle
+{
+    public int Fuel;
+    public Car(string Brand, int Speed, int Fuel) : base(Brand, Speed)
+    {
+        this.Fuel = Fuel;
+    }
+}
+
+class ElectricCar : Vehicle
+{
+    public int BatteryLevel;
+    public ElectricCar(string Brand, int Speed, int BatteryLevel) : base(Brand, Speed)
+    {
+        this.BatteryLevel = BatteryLevel;
+    }
+}
+
+class ServiceStation
+{
+    public void Refuel(Car car)
+    {
+        car.Fuel = 100;
+        Console.WriteLine($"Машина {car.Brand} заправлена бензином");
+    }
+    public void Charger(ElectricCar ev)
+    {
+        ev.BatteryLevel = 100;
+        Console.WriteLine($"Машина {ev.Brand} заряджена до 100%!");
+    }
+}
+
+📦 Завдання: "Кур'єр та Посилка"
+Тобі потрібно створити систему, де кур'єр забирає посилку і змінює її статус.
+1. Клас Parcel (Посилка)
+Поля:
+public string Description (що всередині, наприклад "iPhone").
+public bool IsDelivered (статус доставки, початково false).
+Конструктор: приймає опис і записує його в поле. IsDelivered за замовчуванням false.
+2. Клас Courier (Кур'єр)
+Поля:
+public string Name.
+Конструктор: приймає ім'я кур'єра.
+Метод Deliver(Parcel parcel):
+Ось тут і є Class Method! Він приймає об'єкт посилки.
+Всередині методу:
+Змінюй статус посилки parcel.IsDelivered = true;.
+Виводь повідомлення: "Кур'єр {Name} доставив посилку: {parcel.Description}".
+3. В Main:
+Створи об'єкт посилки (наприклад, "Laptop").
+Створи об'єкт кур'єра (наприклад, "Ivan").
+Виведи в консоль статус посилки ДО доставки (чи доставлена вона?).
+Виклич метод кур'єра Deliver, передавши йому твою посилку.
+Виведи статус посилки ПІСЛЯ доставки.
+
+✅ Рішення:
+Parcel laptop = new Parcel("Laptop");
+Courier courier = new Courier("Ivan");
+Console.WriteLine($"Чи доставлена посилка - {laptop.IsDelivered}");
+courier.Deliver(laptop);
+Console.WriteLine($"Чи доставлена посилка - {laptop.IsDelivered}");
+
+class Parcel
+{
+    public string Description = "";
+    public bool IsDelivered = false;
+    public Parcel(string Description)
+    {
+        this.Description = Description;
+    }
+}
+
+class Courier
+{
+    public string Name = "";
+    public Courier(string Name)
+    {
+        this.Name = Name;
+    }
+    public void Deliver(Parcel parcel)
+    {
+        parcel.IsDelivered = true;
+        Console.WriteLine($"Кур'єр {Name} доставив посилку: {parcel.Description}");
+    }
+}
