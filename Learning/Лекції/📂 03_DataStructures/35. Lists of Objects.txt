@@ -1,0 +1,234 @@
+Тема №35: Робота зі списками об'єктів (Lists of Objects) 👥📦
+Ми навчилися створювати список рядків (string). Але справжня потужність C# проявляється тоді, 
+коли ми створюємо список власних об'єктів. Наприклад, список усіх гравців на сервері.
+
+⚠️ Як це працює:
+Замість string у кутових дужках ми пишемо назву нашого класу:
+List<Player> party = new List<Player>();
+‼️ Тепер у цей список можна додавати цілих персонажів з їхніми іменами та рівнями.
+
+Головна відмінність від List<string>:
+Коли ми створюємо список List<Vehicle>, ми створюємо список посилань.
+Типізація: Ми можемо класти в список будь-який об'єкт, який є "дитиною" Vehicle.
+Доступ: Через цикл foreach (var v in garage) ми маємо доступ до всіх публічних методів та властивостей, які є в базовому класі Vehicle.
+
+📝 Завдання №35:
+Давай створимо команду (Party) для твого героя.
+Створи список об'єктів типу Player: List<Player> team = new List<Player>();.
+Додай у цей список твого основного гравця myPlayer та адміна myAdmin (використовуй .Add()).
+Використай цикл foreach, щоб пройтися по списку team.
+Всередині циклу викликай метод Info() для кожного учасника команди.
+
+✅ Рішення:
+using System.Collections.Generic;
+
+Player myPlayer = new Player("IvanY1", 10);
+Admin myAdmin = new Admin("Ivan_Moderator", 99, "Moderator");
+
+List<Player> team = new List<Player>();
+team.Add(myPlayer);
+team.Add(myAdmin);
+
+foreach(Player person in team)
+{
+    person.Info();
+}
+
+class Player
+{
+    public string nickname = "NoName";
+    private int level;
+    public int Level
+    {
+        get { return level; }
+        set
+        {
+            if(value > 0)
+            {
+                level = value;
+            } else
+            {
+                Console.WriteLine("Помилка! Рівень має бути більше нуля!");
+            }
+        }
+    }
+    public Player(string userName, int userLevel)
+    {
+        nickname = userName;
+        Level = userLevel;
+    }
+    public void Info()
+    {
+        Console.WriteLine($"Я гравець {this.nickname}, мій рівень {this.level}.");
+    }
+    public void LevelUp() 
+    {
+        this.level++;
+        Console.WriteLine($"Рівень піднято! Тепер рівень: {this.level}");
+    }
+}
+
+class Admin : Player
+{
+    public string Role { get; set; } = "Moderator";
+    public Admin(string userName, int userLevel, string adminRole) : base(userName, userLevel)
+    {
+        Role = adminRole;
+    }
+}
+
+📝 Завдання: "Цифровий Гараж"
+Давай застосуємо списки до твоїх знань про класи. Тобі потрібно створити колекцію машин і керувати ними масово.
+Підготовка: Використай свій клас Vehicle (або SmartDevice, якщо хочеш).
+Створення списку: У Main створи список для об'єктів:
+List<Vehicle> garage = new List<Vehicle>();
+Наповнення: Додай у список 4-5 різних машин (BMW, Audi, Tesla, Lada тощо) з різними швидкостями.
+У циклі foreach додай умову if.
+Зроби так, щоб метод .Drive() викликався ТІЛЬКИ для тих машин, у яких швидкість вище 200.
+Для решти машин (тих, що повільніші) виведи в консоль: "Машина {brand} занадто повільна для автобану".
+
+✅ Рішення:
+using System.Collections.Generic;
+
+List<Vehicle> garage = new List<Vehicle>();
+garage.Add(new Car("BMW", 230, 45));
+garage.Add(new Car("Audi", 210, 52));
+garage.Add(new ElectricCar("Tesla", 190, 78));
+var carToRemove = new ElectricCar("eGolf", 150, 32);
+garage.Add(carToRemove);
+garage.Remove(carToRemove);
+garage.RemoveAt(1);
+garage.Add(new Car("Mercedes", 220, 56));
+garage.Add(new Car("Ferrari", 240, 98));
+garage.Add(new ElectricCar("Nissan Leaf", 160, 41));
+Console.WriteLine(garage.Count);
+
+foreach(var car in garage)
+{
+    if (car.Speed > 200)
+    {
+        car.Drive();
+    } else
+    {
+        Console.WriteLine($"Машина {car.Brand} зі швидкістю {car.Speed} км/год занадто повільна для автобану");
+    }
+}
+
+class Vehicle
+{
+    public string Brand { get; private set; }
+    public int Speed { get; private set; }
+    public static int VehicleCount = 0; // static
+    public Vehicle(string Brand, int Speed)
+    {
+        this.Brand = Brand;
+        this.Speed = Speed;
+        VehicleCount++; //static
+    }
+    public void Drive()
+    {
+        Console.WriteLine($"Транспорт {Brand} їде зі швидкістю {Speed} км/год");
+    } 
+}
+
+class Car : Vehicle
+{
+    private int Fuel;
+    public int FuelLevel 
+    { 
+        get { return Fuel; } // Дозволяємо читати приватне поле
+    }
+    public Car(string Brand, int Speed, int Fuel) : base(Brand, Speed)
+    {
+        this.Fuel = Fuel;
+    }
+    public void ShowFuel()
+    {
+        Console.WriteLine($"Палива залишилось: {Fuel}");
+    }
+    public void Refuel(int amount)
+    {
+        if(amount > 0)
+        {
+            Fuel += amount;
+            Console.WriteLine($"Машина {Brand} заправлена до {Fuel}");
+        } else
+        {
+            Console.WriteLine("Помилка! Неможливо заправити від'ємну кількість");
+        }
+    }
+}
+
+class ElectricCar : Vehicle
+{
+    public int BatteryLevel { get; private set; }
+    public ElectricCar(string Brand, int Speed, int BatteryLevel) : base(Brand, Speed)
+    {
+        this.BatteryLevel = BatteryLevel;
+    }
+}
+
+📝 Завдання: "Фінальна ревізія Гаража"
+Давай закріпимо роботу зі списками об'єктів без видалення, але з підрахунком.
+Створи список List<Vehicle>.
+Додай туди 2 звичайні машини (Car) та 2 електрокари (ElectricCar).
+Створи статичну або звичайну змінну double totalSpeed = 0;.
+Через цикл foreach пройдися по списку та:
+Виклич Drive() для кожної машини.
+Додай швидкість кожної машини до totalSpeed.
+Після циклу виведи середню швидкість усіх машин у гаражі (Сума швидкостей / Кількість машин).
+У класі Vehicle:
+Додай нове статичне поле (список рядків):
+public static List<string> AllVehicleModels = new List<string>();
+У конструкторі Vehicle:
+Щоразу, коли створюється машина, додавай її назву до цього списку:
+AllVehicleModels.Add(brand);
+У Main:
+Видали одну-дві машини з гаража через RemoveAt або Remove.
+А тепер головний фокус: виведи в консоль спочатку імена машин, які залишилися в гаражі (через твій звичайний цикл), 
+а потім виведи вміст статичного списку Vehicle.AllVehicleModels.
+
+✅ Рішення:
+using System.Collections.Generic;
+List<Vehicle> garage = new List<Vehicle>();
+garage.Add(new Car("BMW", 230, 45));
+garage.Add(new Car("Audi", 210, 52));
+garage.Add(new ElectricCar("Tesla", 190, 78));
+garage.Add(new ElectricCar("Nissan Leaf", 160, 41));
+garage.RemoveAt(3); // оскільки після видалення список стискається, то потрібно видаляти з кінця
+garage.RemoveAt(2);
+
+foreach(var car in garage)
+{
+    car.Drive();
+    Vehicle.TotalSpeed += car.Speed;
+}
+Console.WriteLine($"Середня швидкість усіх машин в гаражі: {Vehicle.TotalSpeed / Vehicle.VehicleCount} км/год");
+
+Console.WriteLine("--- Архів усіх створених моделей ---");
+foreach(var model in Vehicle.AllVehicleModels){
+    Console.WriteLine(model);
+}
+
+class Vehicle
+{
+    public string Brand { get; private set; }
+    public int Speed { get; private set; }
+    public static double TotalSpeed = 0; // static
+    public static int VehicleCount = 0; // static
+    public static List<string> AllVehicleModels = new List<string>(); // static
+    public Vehicle(string Brand, int Speed)
+    {
+        this.Brand = Brand;
+        this.Speed = Speed;
+        VehicleCount++; //static
+        AllVehicleModels.Add(Brand);
+    }
+    public void Drive()
+    {
+        Console.WriteLine($"Транспорт {Brand} їде зі швидкістю {Speed} км/год");
+    } 
+}
+
+-- код з іншими класами повторюється, як і в попередньому завданні --
+
