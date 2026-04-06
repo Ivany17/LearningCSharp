@@ -1,0 +1,224 @@
+Тема №33: Модифікатор static у C# 📘
+У звичайних класах все, що ми створюємо, належить об'єкту (екземпляру). Але static змінює правила гри.
+🏢 Клас vs Об'єкт: Уяви, що клас — це креслення багатоповерхівки.
+Звичайне поле — це номер квартири. У кожної квартири він свій.
+Статичне поле — це адреса будинку. Вона однакова для всіх квартир у цьому будинку.
+
+⚡ Головна особливість: Статичні члени (поля, методи, властивості) належать самому Класу. Тобі не потрібно писати new, щоб до них звернутися.
+💾 Пам'ять: Статичне поле створюється в пам'яті лише один раз. Усі об'єкти цього класу "бачать" 
+одне й те саме значення і можуть його змінювати разом.
+
+📞 Як викликати:
+Звичайне: myCar.Drive(); (через ім'я об'єкта).
+Статичне: Vehicle.VehicleCount; (через ім'я класу).
+
+Ось стислий конспект, який варто зберегти:
+🏢 Що це?: static робить елемент власністю самого Класу, а не конкретного об'єкта.
+🔢 Поля: Створюються в пам'яті один раз. Усі екземпляри ділять одне значення між собою.
+⚙️ Методи: Можна викликати без створення об'єкта (наприклад, Math.Sqrt()).
+⚠️ Обмеження: Статичний метод не може звертатися до звичайних (не статичних) полів класу, бо він не знає, якому саме об'єкту вони належать.
+📞 Виклик: Використовується формат НазваКласу.Елемент (наприклад, Vehicle.VehicleCount).
+
+📝 Завдання №33: "Глобальний лічильник автопарку"
+Давай перевіримо це на практиці. Тобі потрібно змінити свій код так, щоб він сам рахував кількість створених машин.
+У клас Vehicle додай:
+public static int VehicleCount = 0; 🔢
+В конструктор Vehicle додай:
+VehicleCount++; ➕ (щоразу, коли створюється будь-який транспорт, лічильник зросте).
+В Main:
+Створи 3-4 різні машини (BMW, Tesla, Audi тощо).
+Виведи в консоль: Console.WriteLine($"Всього машин: {Vehicle.VehicleCount}"); 📊
+
+✅ Рішення:
+ServiceStation station = new ServiceStation();
+Car bmw = new Car("BMW", 230, 45);
+bmw.Drive();
+Car audi = new Car("Audi", 210, 52);
+Console.WriteLine($"Поточне паливо: {bmw.FuelLevel}");
+ElectricCar tesla = new ElectricCar("Tesla", 200, 78);
+tesla.Drive();
+station.Refuel(bmw);
+station.Charger(tesla);
+Console.WriteLine($"Всього машин: {Vehicle.VehicleCount}");
+
+class Vehicle
+{
+    public string Brand { get; private set; }
+    public int Speed { get; private set; }
+    public static int VehicleCount = 0; // static
+    public Vehicle(string Brand, int Speed)
+    {
+        this.Brand = Brand;
+        this.Speed = Speed;
+        VehicleCount++; //static
+    }
+    public void Drive()
+    {
+        Console.WriteLine($"Транспорт {Brand} їде зі швидкістю {Speed} км/год");
+    } 
+}
+
+class Car : Vehicle
+{
+    private int Fuel;
+    public int FuelLevel 
+    { 
+        get { return Fuel; } // Дозволяємо читати приватне поле
+    }
+    public Car(string Brand, int Speed, int Fuel) : base(Brand, Speed)
+    {
+        this.Fuel = Fuel;
+    }
+    public void ShowFuel()
+    {
+        Console.WriteLine($"Палива залишилось: {Fuel}");
+    }
+    public void Refuel(int amount)
+    {
+        if(amount > 0)
+        {
+            Fuel += amount;
+            Console.WriteLine($"Машина {Brand} заправлена до {Fuel}");
+        } else
+        {
+            Console.WriteLine("Помилка! Неможливо заправити від'ємну кількість");
+        }
+    }
+}
+
+class ElectricCar : Vehicle
+{
+    public int BatteryLevel { get; private set; }
+    public ElectricCar(string Brand, int Speed, int BatteryLevel) : base(Brand, Speed)
+    {
+        this.BatteryLevel = BatteryLevel;
+    }
+}
+
+class ServiceStation
+{
+    public void Refuel(Car car) 
+    {
+        car.Refuel(100); 
+        Console.WriteLine($"Сервіс завершено для {car.Brand}");
+    }
+    public void Charger(ElectricCar ev)
+    {
+        Console.WriteLine($"Машина {ev.Brand} заряджена до 100%!");
+    }
+}
+
+🏛️ Завдання: "Система управління Смарт-Будинком"
+Тобі потрібно створити систему, де є різні типи пристроїв, вони мають захищені дані та можуть взаємодіяти.
+1. Батьківський клас SmartDevice (Inheritance + Static) 🏠
+Статичне поле: public static int TotalDevices (рахує всі створені пристрої).
+Властивості: Brand та PowerConsumption (споживання енергії). Зроби їх автоматичними з private set.
+Конструктор: приймає марку та споживання, записує їх і збільшує TotalDevices.
+Метод: public void ShowStatus(), який виводить марку та скільки ватт вона споживає.
+2. Класи-спадкоємці (Inheritance) 💡
+Клас SmartLight: додає приватне поле brightness (яскравість від 0 до 100).
+Клас SmartSpeaker: додає приватне поле volume (гучність).
+3. Інкапсуляція та логіка (Private/Public + Properties) 🔒
+У обох класах створи Properties для яскравості/гучності з get та set.
+У set додай перевірку: значення не може бути менше 0 або більше 100. Якщо користувач вводить 150 — став 100 і виводь попередження.
+4. Взаємодія (Class Methods) ⚡
+Створи клас RemoteControl (Пульт).
+Додай у нього метод TurnOff(SmartDevice device).
+Метод має приймати будь-який пристрій і виводити: "Пристрій {device.Brand} вимкнено для економії енергії!".
+🕹️ Що зробити в Main:
+Створи одну лампу (SmartLight) та одну колонку (SmartSpeaker).
+Спробуй задати їм яскравість/гучність через властивості (один раз правильно, один раз — помилкове значення, наприклад 200).
+Створи пульт (RemoteControl) і через нього вимкни обидва пристрої.
+В кінці виведи загальну кількість пристроїв через статичне поле SmartDevice.TotalDevices.
+
+✅ Рішення:
+SmartLight light = new SmartLight("Light", 12);
+light.Brightness = 34;
+light.Brightness = 134;
+SmartSpeaker speaker = new SmartSpeaker("Speaker", 23);
+speaker.Volume = 46;
+speaker.Volume = 146;
+
+RemoteControl remote = new RemoteControl();
+remote.TurnOff(light);
+remote.TurnOff(speaker);
+
+Console.WriteLine($"В квартирі всього {SmartDevice.TotalDevices} пристрої");
+
+class SmartDevice
+{
+    public static int TotalDevices = 0; // static
+    public string Brand { get; private set; }
+    public double PowerConsumption { get; private set; }
+    public SmartDevice(string Brand, double PowerConsumption){
+        this.Brand = Brand;
+        this.PowerConsumption = PowerConsumption;
+        TotalDevices++; // static
+    }
+    public void ShowStatus()
+    {
+        Console.WriteLine($"{Brand} споживає {PowerConsumption} кВт/год");
+    }
+}
+
+class SmartLight : SmartDevice
+{
+    private int brightness;
+    public int Brightness
+    {
+        get
+        {
+            return brightness;
+        } set
+        {
+            if(value < 0)
+            {
+                brightness = 0;
+                Console.WriteLine("Значення не може бути нижче 0");
+            } else if(value > 100)
+            {
+                brightness = 100;
+                Console.WriteLine("Значення не може бути вище 100");
+            } else
+            {
+                brightness = value;
+            }
+        }
+    }
+    public SmartLight(string Brand, double PowerConsumption) : base(Brand, PowerConsumption){}
+}
+
+class SmartSpeaker : SmartDevice
+{
+    private int volume;
+    public int Volume
+    {
+        get
+        {
+            return volume;
+        } set
+        {
+            if(value < 0)
+            {
+                volume = 0;
+                Console.WriteLine("Значення не може бути нижче 0");
+            } else if(value > 100)
+            {
+                volume = 100;
+                Console.WriteLine("Значення не може бути вище 100");
+            } else
+            {
+                volume = value;
+            }
+        }
+    }
+    public SmartSpeaker(string Brand, double PowerConsumption) : base(Brand, PowerConsumption){}
+}
+
+class RemoteControl
+{
+    public void TurnOff(SmartDevice device)
+    {
+        Console.WriteLine($"Пристрій {device.Brand} вимкнено для економії енергії!");
+    }
+}
