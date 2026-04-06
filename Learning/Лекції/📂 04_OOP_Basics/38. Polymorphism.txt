@@ -1,0 +1,220 @@
+Тема №38: Поліморфізм (Polymorphism) 🎭
+Поліморфізм — це здатність об'єктів різних класів реагувати на один і той самий виклик методу по-різному.
+Слово походить від грецького: poly (багато) + morph (форма). Тобто "одна дія — багато форм виконання".
+Пам'ятаєш, як Admin наслідував метод Info() від Player? А що, як ми хочемо, щоб адмін розповідав про себе трохи інакше 
+(наприклад, згадував свою роль)?
+
+⚠️ Як це зробити:
+У базовому класі (Player) додаємо слово virtual до методу. Це дозвіл на зміни.
+У класі-нащадку (Admin) пишемо метод з таким самим ім'ям, але додаємо слово override (перезаписати).
+
+// У класі Player
+public virtual void Info() { ... }
+
+// У класі Admin
+public override void Info() 
+{
+    Console.WriteLine($"Я адмін {nickname}, моя роль: {role}");
+}
+
+📝 Завдання №38:
+Давай зробимо твоїх персонажів унікальними.
+У класі Player додай слово virtual до методу Info.
+У класі Admin створи метод Info, використовуючи слово override.
+Зроби так, щоб Info адміна виводив: "Я адмін {nickname}, мій рівень {level} та моя роль {role}".
+У верхній частині програми просто залиш той самий цикл foreach зі списком team, який ми робили в завданні №28.
+
+✅ Рішення:
+using System.Collections.Generic;
+
+Player myPlayer = new Player("IvanY1", 10);
+Admin myAdmin = new Admin("Ivan_Moderator", 99, "Moderator");
+
+List<Player> team = new List<Player>();
+team.Add(myPlayer);
+team.Add(myAdmin);
+
+foreach(Player person in team)
+{
+    person.Info();
+}
+
+class Player
+{
+    public string nickname = "NoName";
+    private int level;
+    public int Level
+    {
+        get { return level; }
+        set
+        {
+            if(value > 0)
+            {
+                level = value;
+            } else
+            {
+                Console.WriteLine("Помилка! Рівень має бути більше нуля!");
+            }
+        }
+    }
+    public Player(string userName, int userLevel)
+    {
+        nickname = userName;
+        Level = userLevel;
+    }
+    public virtual void Info()
+    {
+        Console.WriteLine($"Я гравець {this.nickname}, мій рівень {this.level}.");
+    }
+    public void LevelUp() 
+    {
+        this.level++;
+        Console.WriteLine($"Рівень піднято! Тепер рівень: {this.level}");
+    }
+}
+
+class Admin : Player
+{
+    public string Role { get; set; } = "Moderator";
+    public Admin(string userName, int userLevel, string adminRole) : base(userName, userLevel)
+    {
+        Role = adminRole;
+    }
+    public override void Info()
+    {
+        Console.WriteLine($"Я адмін {Nickname}, мій рівень {Level} та моя роль {Role}");
+    }
+}
+
+// в консолі "Я гравець IvanY1, мій рівень 10."
+// в консолі "Я адмін Ivan_Moderator, мій рівень 99 та моя роль Moderator"
+
+🛠️ Практичне завдання: "Різний рух"
+Давай зробимо так, щоб твій перший цикл foreach(var car in garage) став по-справжньому поліморфним.
+У класі Vehicle:
+Знайди метод public void Drive(). Додай до нього слово virtual.
+public virtual void Drive() { ... }
+У класі ElectricCar:
+Створи метод public override void Drive().
+Зроби так, щоб він виводив: "Електрокар {Brand} безшумно їде зі швидкістю {Speed} км/год".
+У класі Car:
+Створи метод public override void Drive().
+Зроби так, щоб він виводив: "Машина {Brand} гуде мотором на швидкості {Speed} км/год".
+У Main:
+Просто залиш свій перший цикл:
+foreach(var car in garage) { car.Drive(); }
+
+✅ Рішення:
+using System.Collections.Generic;
+List<Vehicle> garage = new List<Vehicle>();
+garage.Add(new Car("BMW", 230, 45));
+garage.Add(new ElectricCar("Tesla", 190, 78));
+
+foreach(var car in garage)
+{
+    car.Drive(); // Polymorphism
+    if(car is ElectricCar ev)
+    {
+        Console.WriteLine($"Батарея заряджена на {ev.BatteryLevel}%");
+        ev.ChekBattery();
+        ev.Stop(); // Interface
+    } else if (car is Car petrolCar)
+    {
+        Console.WriteLine("Тип палива: Бензин");
+        petrolCar.ChangeOil();
+        petrolCar.Stop(); // Interface
+    } else
+    {
+        Console.WriteLine("Цей транспорт не потребує специфічного обслуговування");
+    }
+}
+
+// List<IStoppable> emergencyList = new List<IStoppable>();
+// emergencyList.Add(new Car("BMW", 230, 45));
+// emergencyList.Add(new ElectricCar("Tesla", 190, 78));
+// foreach(var stop in emergencyList)
+// {
+//     stop.Stop();
+// }
+
+interface IStoppable // Interface
+{
+    void Stop();
+}
+
+class Vehicle : IStoppable
+{
+    public string Brand { get; private set; }
+    public int Speed { get; private set; }
+    public static double TotalSpeed = 0; // static
+    public static int VehicleCount = 0; // static
+    public static List<string> AllVehicleModels = new List<string>(); // static
+    public Vehicle(string Brand, int Speed)
+    {
+        this.Brand = Brand;
+        this.Speed = Speed;
+        VehicleCount++; //static
+        AllVehicleModels.Add(Brand);
+    }
+    public virtual void Drive()
+    {
+        Console.WriteLine($"Транспорт {Brand} їде зі швидкістю {Speed} км/год");
+    } 
+    public void Stop()
+    {
+        Console.WriteLine("Транспорт зупинився");
+    }
+}
+
+class Car : Vehicle, IStoppable
+{
+    private int Fuel;
+    public int FuelLevel 
+    { 
+        get { return Fuel; } // Дозволяємо читати приватне поле
+    }
+    public Car(string Brand, int Speed, int Fuel) : base(Brand, Speed)
+    {
+        this.Fuel = Fuel;
+    }
+    public void ShowFuel()
+    {
+        Console.WriteLine($"Палива залишилось: {Fuel}");
+    }
+    public void Refuel(int amount)
+    {
+        if(amount > 0)
+        {
+            Fuel += amount;
+            Console.WriteLine($"Машина {Brand} заправлена до {Fuel}");
+        } else
+        {
+            Console.WriteLine("Помилка! Неможливо заправити від'ємну кількість");
+        }
+    }
+    public void ChangeOil()
+    {
+        Console.WriteLine($"Заміна масла для {Brand} проведена");
+    }
+    public override void Drive()
+    {
+        Console.WriteLine($"Машина {Brand} гуде мотором на швидкості {Speed} км/год");
+    }
+}
+
+class ElectricCar : Vehicle, IStoppable
+{
+    public int BatteryLevel { get; private set; }
+    public ElectricCar(string Brand, int Speed, int BatteryLevel) : base(Brand, Speed)
+    {
+        this.BatteryLevel = BatteryLevel;
+    }
+    public void ChekBattery()
+    {
+        Console.WriteLine($"Діагностика батареї для {Brand} завершена");
+    }
+    public override void Drive()
+    {
+        Console.WriteLine($"Електрокар {Brand} безшумно їде зі швидкістю {Speed} км/год");
+    }
+}
