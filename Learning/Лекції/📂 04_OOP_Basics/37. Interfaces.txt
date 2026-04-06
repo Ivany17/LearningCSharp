@@ -1,0 +1,183 @@
+Тема №37: Інтерфейси (Interfaces) 📜⚙️
+Ми вивчили наслідування (клас від класу). Але іноді об'єкти з абсолютно різних категорій мають 
+виконувати однакову дію. Наприклад, і Гравець, і Двері, і Скриня можуть бути «інтерактивними» (з ними можна взаємодіяти клавішею «Е»).
+
+Для цього існують інтерфейси. Це не клас, а «контракт» або список правил. 
+‼️ Якщо клас підписує цей контракт, він зобов'язаний реалізувати певні методи.
+
+Інтерфейси завжди починаються з великої літери I (це домовленість усіх програмістів). 
+В інтерфейсі ми тільки кажемо, ЩО треба зробити, але не пишемо, ЯК.
+
+⚠️ Як це виглядає:
+interface IInteractable
+{
+    void Interact(); // Тільки назва методу, без коду всередині
+}
+
+Клас, що використовує інтерфейс:
+class Chest : IInteractable
+{
+    public void Interact() 
+    {
+        Console.WriteLine("Скриня відкрилася!");
+    }
+}
+
+Правило №1: Інтерфейс — це пропуск у спеціальний список. Немає напису : IInterface — немає входу в List<IInterface>.
+Правило №2: Якщо батько (Vehicle) підписав контракт, діти стають учасниками контракту "за спадком". Їм не треба писати це в заголовку класу.
+Правило №3: Якщо у батька вже є метод, який вимагає інтерфейс (наприклад, Stop), то дітям писати його не обов'язково. 
+Вони просто будуть використовувати батьківський, поки ти сам не захочеш написати їм щось особливе.
+
+📝 Завдання №37:
+Давай додамо в твій ігровий світ інтерактивний об'єкт.
+Створи інтерфейс IInteractable з одним методом void Interact();.
+Створи новий клас Item (це може бути аптечка або зброя).
+Зроби так, щоб клас Item наслідував інтерфейс IInteractable (через двократку: class Item : IInteractable).
+Всередині класу Item напиши код для методу Interact(), який виводить: "Предмет підібрано!".
+У головній частині програми створи об'єкт предмета і виклич його метод:
+
+Item medKit = new Item();
+medKit.Interact();
+
+✅ Рішення:
+Item medKit = new Item();
+medKit.Interact(); // в консолі "Предмет підібрано!"
+
+interface IInteractable
+{
+    void Interact();
+}
+
+class Item : IInteractable
+{
+    public void Interact()
+    {
+        Console.WriteLine("Предмет підібрано!");
+    }
+}
+
+📝 Завдання: "Контракт на гальмування"
+Створи інтерфейс IStoppable. У ньому має бути один метод: void Stop();.
+Підключи його до свого класу Vehicle (або окремо до Car та ElectricCar).
+Реалізуй метод: У кожному класі напиши метод public void Stop(), який виводить у консоль щось своє (наприклад: "Електрокар зупинився рекуперацією").
+Перевір у Main:
+Створи об'єкт Car.
+Виклич у нього метод .Stop()
+Після цього залиш інтерфейс IStoppable та його реалізацію в класах.
+Створи новий список: List<IStoppable> emergencyList = new List<IStoppable>();.
+Додай туди свою BMW та свою Tesl-у.
+А тепер — найголовніше. Напиши окремий цикл foreach для цього списку:
+
+✅ Рішення:
+List<Vehicle> garage = new List<Vehicle>();
+garage.Add(new Car("BMW", 230, 45));
+garage.Add(new ElectricCar("Tesla", 190, 78));
+
+foreach(var car in garage)
+{
+    car.Drive();
+    
+    if(car is ElectricCar ev)
+    {
+        Console.WriteLine($"Батарея заряджена на {ev.BatteryLevel}%");
+        ev.ChekBattery();
+        ev.Stop(); // Interface
+    } else if (car is Car petrolCar)
+    {
+        Console.WriteLine("Тип палива: Бензин");
+        petrolCar.ChangeOil();
+        petrolCar.Stop(); // Interface
+    } else
+    {
+        Console.WriteLine("Цей транспорт не потребує специфічного обслуговування");
+    }
+}
+
+List<IStoppable> emergencyList = new List<IStoppable>();
+emergencyList.Add(new Car("BMW", 230, 45));
+emergencyList.Add(new ElectricCar("Tesla", 190, 78));
+foreach(var stop in emergencyList)
+{
+    stop.Stop();
+}
+
+interface IStoppable // Interface
+{
+    void Stop();
+}
+
+
+class Vehicle
+{
+    public string Brand { get; private set; }
+    public int Speed { get; private set; }
+    public static double TotalSpeed = 0; // static
+    public static int VehicleCount = 0; // static
+    public static List<string> AllVehicleModels = new List<string>(); // static
+    public Vehicle(string Brand, int Speed)
+    {
+        this.Brand = Brand;
+        this.Speed = Speed;
+        VehicleCount++; //static
+        AllVehicleModels.Add(Brand);
+    }
+    public void Drive()
+    {
+        Console.WriteLine($"Транспорт {Brand} їде зі швидкістю {Speed} км/год");
+    } 
+}
+
+class Car : Vehicle, IStoppable
+{
+    private int Fuel;
+    public int FuelLevel 
+    { 
+        get { return Fuel; } // Дозволяємо читати приватне поле
+    }
+    public Car(string Brand, int Speed, int Fuel) : base(Brand, Speed)
+    {
+        this.Fuel = Fuel;
+    }
+    public void ShowFuel()
+    {
+        Console.WriteLine($"Палива залишилось: {Fuel}");
+    }
+    public void Refuel(int amount)
+    {
+        if(amount > 0)
+        {
+            Fuel += amount;
+            Console.WriteLine($"Машина {Brand} заправлена до {Fuel}");
+        } else
+        {
+            Console.WriteLine("Помилка! Неможливо заправити від'ємну кількість");
+        }
+    }
+    public void ChangeOil()
+    {
+        Console.WriteLine($"Заміна масла для {Brand} проведена");
+    }
+    public void Stop() // Interface
+    {
+        Console.WriteLine("Автомобіль зупинився");
+    }
+}
+
+class ElectricCar : Vehicle, IStoppable
+{
+    public int BatteryLevel { get; private set; }
+    public ElectricCar(string Brand, int Speed, int BatteryLevel) : base(Brand, Speed)
+    {
+        this.BatteryLevel = BatteryLevel;
+    }
+    public void ChekBattery()
+    {
+        Console.WriteLine($"Діагностика батареї для {Brand} завершена");
+    }
+    public void Stop() // Interface
+    {
+        Console.WriteLine("Електрокар зупинився рекуперацією");
+    }
+}
+
+
