@@ -1,0 +1,109 @@
+Тема №45: "Злом" структури JSON 🧨
+Буває так, що файл існує, але його вміст — це повна нісенітниця (наприклад, файл зберігся лише наполовину через вимкнення світла). 
+Це теж викличе помилку, але вже не при читанні файлу, а при спробі десеріалізації.
+
+❗️ Є різниця між двома типами проблем:
+Помилка вмісту (JsonException): Файл є, як в минулому році, але всередині сміття.
+Помилка доступу (FileNotFoundException): Файлу немає, або назва вказана неправильно.
+
+📝 Завдання №45:
+Давай перевіримо, чи впіймає твій try...catch помилку в самому тексті.
+Розкоментуй рядки запису файлу (ті, що ми ховали в минулому завданні).
+Замість того, щоб записувати туди правильний jsonString, запиши будь-яку "каляку-маляку":
+File.WriteAllText("player_save.json", "Це точно не JSON!");
+Залиш код читання файлу player_save.json та спробу його десеріалізації у блоці try.
+Запусти програму.
+Що має статися:
+Метод File.ReadAllText спрацює (бо файл є), але JsonSerializer.Deserialize «схопиться за голову», 
+бо він чекав на структуру з дужками, а отримав дивний текст. Програма знову має стрибнути в блок catch.
+
+✅ Рішення:
+//У файлі Program.cs
+using System.Collections.Generic;
+using System.Text.Json;
+using System.IO;
+
+Player myPlayer = new Player("IvanY1", 10);
+Admin myAdmin = new Admin("Ivan_Moderator", 99, "Moderator");
+
+List<Player> team = new List<Player>();
+team.Add(myPlayer);
+team.Add(myAdmin);
+
+try 
+{
+    //Серіалізація
+    string jsonString = JsonSerializer.Serialize(myPlayer);
+    Console.WriteLine(jsonString);
+
+    //Створити новий файл "player_save.json"
+    File.WriteAllText("player_save.json", "Це точно не JSON!"); // замість jsonString пишемо "Це точно не JSON!" аби створити помилку
+    Console.WriteLine("Дані успішно збережено у файл!");
+
+    //Десеріалізація
+    string newPlayerData = "{\"Nickname\":\"ProPlayer\",\"Level\":50}";
+    Player? importedPlayer = JsonSerializer.Deserialize<Player>(newPlayerData); // додаємо (?) аби зникли жовті рядки помилок
+    Console.WriteLine($"Ім'я імпортованого гравця: {importedPlayer?.Nickname ?? "Невідомо"}"); // в терміналі: "Ім'я імпортованого гравця: ProPlayer" | додаємо (?.Nickname ?? "Невідомо") аби зникли жовті рядки помилок
+
+    //Читання з файлу
+    string fileContent = File.ReadAllText("player_save.json");
+    Player? loadedPlayer = JsonSerializer.Deserialize<Player>(fileContent);  // додаємо (?) аби зникли жовті рядки помилок
+    Console.WriteLine($"Гравця успішно завантажено! Вітаємо знову, {loadedPlayer?.Nickname ?? "Невідомо"}!"); // в консолі "Гравця успішно завантажено! Вітаємо знову, IvanY1!" | додаємо (?.Nickname ?? "Невідомо") аби зникли жовті рядки помилок
+}
+catch (Exception ex)
+{
+    // Додаємо ex.Message, щоб побачити суть проблеми
+    Console.WriteLine($"Помилка завантаження: {ex.Message}"); // з'явиться у випадку помилки
+}
+
+class Player
+{
+    public string Nickname { get; set; } = "NoName"; // додаємо (= "NoName") аби зникли жовті рядки помилок
+    private int level;
+    public int Level
+    {
+        get { return level; }
+        set
+        {
+            if(value > 0)
+            {
+                level = value;
+            } else
+            {
+                Console.WriteLine("Помилка! Рівень має бути більше нуля!");
+            }
+        }
+    }
+    public Player() {}
+    public Player(string userName, int userLevel)
+    {
+        Nickname = userName;
+        Level = userLevel;
+    }
+    public virtual void Info()
+    {
+        Console.WriteLine($"Я гравець {this.Nickname}, мій рівень {this.level}.");
+    }
+    public void LevelUp() 
+    {
+        this.level++;
+        Console.WriteLine($"Рівень піднято! Тепер рівень: {this.level}");
+    }
+}
+
+class Admin : Player
+{
+    public string Role { get; set; } = "Moderator";
+    public Admin(string userName, int userLevel, string adminRole) : base(userName, userLevel)
+    {
+        Role = adminRole;
+    }
+    public override void Info()
+    {
+        Console.WriteLine($"Я адмін {Nickname}, мій рівень {Level} та моя роль {Role}");
+    }
+}
+
+
+//У файлі player_save.json
+{"Nickname":"IvanY1","Level":10}
