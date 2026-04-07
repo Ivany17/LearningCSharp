@@ -1,0 +1,127 @@
+Тема №43: Читання з файлу 📖
+Записати дані — це лише половина справи. Тепер нам треба навчити програму "згадувати" свого гравця при наступному запуску.
+Для цього ми використаємо метод File.ReadAllText. 
+Він робить рівно протилежне до того, що ми робили раніше: бере текст із файлу і повертає його в програму у вигляді рядка.
+
+🧮 Приклад виконання простого коду на серіалізацію, десеріалізацію, створення і читання з файлу списку List<User>
+List<User> users = new List<User>();
+users.Add(new User{Name = "Ivan", Age = 25});
+users.Add(new User{Name = "Maria", Age = 27});
+users.Add(new User{Name = "Alex", Age = 22});
+
+var options = new JsonSerializerOptions { WriteIndented = true };
+// Serialize
+string jsonString = JsonSerializer.Serialize(users, options);
+// Create a file
+File.WriteAllText("users.json", jsonString);
+// Read from the file
+string readedFile = File.ReadAllText("users.json");
+// Deserialize from the reading file
+List<User>? restoredUsers = JsonSerializer.Deserialize <List<User>> (readedFile);
+foreach(var names in restoredUsers ?? new List<User>()) // ?? new List<User>() - щоб зник жовтий рядок
+{
+    Console.WriteLine(names.Name);
+}
+
+class User
+{
+    public string Name { get; set; } = "";
+    public int Age { get; set; }
+}
+
+Схема дій:
+1️⃣ Зчитуємо текст із файлу: string savedData = File.ReadAllText("player_save.json");
+2️⃣ Перетворюємо цей текст на об'єкт Player (десеріалізація).
+3️⃣ Використовуємо цей об'єкт у грі.
+
+📝 Завдання №43:
+Давай перевіримо, чи вміє твоя програма "читати".
+Створи нову змінну-рядок і зчитай у неї вміст твого файлу:
+string fileContent = File.ReadAllText("player_save.json");
+
+Перетвори цей зчитаний текст на нового об'єкта (назви його, наприклад, loadedPlayer):
+Player loadedPlayer = JsonSerializer.Deserialize<Player>(fileContent);
+
+Виведи в консоль радісне повідомлення:
+Console.WriteLine($"Гравця успішно завантажено! Вітаємо знову, {loadedPlayer.Nickname}!");
+
+Чому це важливо: Уяви, що ти видалив рядки, де створював myPlayer вручну. 
+Завдяки файлу, твоя програма все одно зможе працювати, бо вона "прочитає" героя з пам'яті комп'ютера.
+
+✅ Рішення:
+//У файлі Program.cs
+using System.Collections.Generic;
+using System.Text.Json;
+using System.IO;
+
+Player myPlayer = new Player("IvanY1", 10);
+Admin myAdmin = new Admin("Ivan_Moderator", 99, "Moderator");
+
+List<Player> team = new List<Player>();
+team.Add(myPlayer);
+team.Add(myAdmin);
+
+//Серіалізація
+string jsonString = JsonSerializer.Serialize(myPlayer);
+Console.WriteLine(jsonString);
+
+//Створити новий файл "player_save.json"
+File.WriteAllText("player_save.json", jsonString);
+Console.WriteLine("Дані успішно збережено у файл!");
+
+//Читання з файлу
+string fileContent = File.ReadAllText("player_save.json");
+Player? loadedPlayer = JsonSerializer.Deserialize<Player>(fileContent);  // додаємо (?) аби зникли жовті рядки помилок
+Console.WriteLine($"Гравця успішно завантажено! Вітаємо знову, {loadedPlayer?.Nickname ?? "Невідомо"}!"); // в консолі "Гравця успішно завантажено! Вітаємо знову, IvanY1!" | додаємо (?.Nickname ?? "Невідомо") аби зникли жовті рядки помилок
+
+class Player
+{
+    public string Nickname { get; set; } = "NoName"; // додаємо (= "NoName") аби зникли жовті рядки помилок
+    private int level;
+    public int Level
+    {
+        get { return level; }
+        set
+        {
+            if(value > 0)
+            {
+                level = value;
+            } else
+            {
+                Console.WriteLine("Помилка! Рівень має бути більше нуля!");
+            }
+        }
+    }
+    public Player() {}
+    public Player(string userName, int userLevel)
+    {
+        Nickname = userName;
+        Level = userLevel;
+    }
+    public virtual void Info()
+    {
+        Console.WriteLine($"Я гравець {this.Nickname}, мій рівень {this.level}.");
+    }
+    public void LevelUp() 
+    {
+        this.level++;
+        Console.WriteLine($"Рівень піднято! Тепер рівень: {this.level}");
+    }
+}
+
+class Admin : Player
+{
+    public string Role { get; set; } = "Moderator";
+    public Admin(string userName, int userLevel, string adminRole) : base(userName, userLevel)
+    {
+        Role = adminRole;
+    }
+    public override void Info()
+    {
+        Console.WriteLine($"Я адмін {Nickname}, мій рівень {Level} та моя роль {Role}");
+    }
+}
+
+
+//У файлі player_save.json
+{"Nickname":"IvanY1","Level":10}
