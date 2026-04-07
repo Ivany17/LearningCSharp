@@ -1,0 +1,114 @@
+Тема №40: Що таке JSON і як він виглядає? 📄
+JSON (JavaScript Object Notation) — це найпопулярніший формат для збереження та передачі даних у сучасному програмуванні. 
+Коли ти бачиш збереження прогресу в іграх, налаштування програми або обмін даними між сайтами — у 90% випадків там працює JSON.
+
+Він ідеально підходить для C#, оскільки структура JSON дуже схожа на структуру об'єктів (класів), які ми щойно вивчали.
+JSON — це просто текстовий файл, де дані записані у вигляді пар "ключ": "значення".
+
+У реальних іграх ми зазвичай зберігаємо не одного гравця, а цілу групу (наприклад, список усіх знайдених предметів 
+або список усіх персонажів у загоні). JSON дозволяє зберігати масиви та списки так само легко, як і окремі об'єкти.
+
+🔑 Приклад твого гравця у форматі JSON:
+{
+  "Nickname": "IvanY1",
+  "Level": 10,
+  "IsAdmin": false
+}
+
+🔑 Приклад твого списку гравців у форматі JSON:
+У тексті в файлі file.json список береться у квадратні дужки [...]:
+[
+  {"Nickname": "IvanY1", "Level": 10},
+  {"Nickname": "Ivan_Moderator", "Level": 99}
+]
+
+
+‼️ Щоб працювати з JSON у C#, нам знадобляться дві дії:
+
+➡️ Серіалізація: Перетворення об'єкта (Player) на текст (рядок JSON), щоб його можна було записати у файл.
+⬅️ Десеріалізація: Перетворення тексту з файлу назад у живий об'єкт C#.
+
+📜 А для списку ти просто серіалізуєш не myPlayer, а цілий список team, який ми створили раніше.
+string listJson = JsonSerializer.Serialize(team);
+
+📚 Підготовка: Бібліотека System.Text.Json 📦
+Для роботи нам знадобиться вбудований інструмент від Microsoft. На самому початку коду (на 1-му рядку) потрібно додати:
+using System.Text.Json;
+
+‼️ В класі ЗАВЖДИ додавай властивостi { get; set; }, якщо хочеш, щоб дані відобразилися в JSON консолі.
+
+⁉️ Порада: Щоб JSON у файлі виглядав красиво (з відступами та новими рядками), а не в один довгий рядок, використай налаштування:
+
+var options = new JsonSerializerOptions { WriteIndented = true };
+string jsonString = JsonSerializer.Serialize(yourList, options);
+
+📝 Завдання №40:
+Давай навчимо твою програму перетворювати об'єкт на текст.
+Додай using System.Text.Json; на початку файлу.
+Використай свій об'єкт myPlayer (або створи нового).
+Створи рядок, куди "запакуєш" дані гравця:
+string jsonString = JsonSerializer.Serialize(myPlayer);
+Виведи цей рядок у консоль: Console.WriteLine(jsonString);
+Важливо: Щоб JsonSerializer побачив твої дані, властивості в класі Player обов'язково мають бути public (або мати публічні get та set).
+
+✅ Рішення:
+using System.Collections.Generic;
+using System.Text.Json;
+
+Player myPlayer = new Player("IvanY1", 10);
+Admin myAdmin = new Admin("Ivan_Moderator", 99, "Moderator");
+
+List<Player> team = new List<Player>();
+team.Add(myPlayer);
+team.Add(myAdmin);
+
+//Серіалізація
+string jsonString = JsonSerializer.Serialize(myPlayer);
+Console.WriteLine(jsonString); // в консолі "{"Nickname":"IvanY1","Level":10}"
+
+class Player
+{
+    public string Nickname { get; set; } = "NoName"; // додаємо (= "NoName") аби зникли жовті рядки помилок
+    private int level;
+    public int Level
+    {
+        get { return level; }
+        set
+        {
+            if(value > 0)
+            {
+                level = value;
+            } else
+            {
+                Console.WriteLine("Помилка! Рівень має бути більше нуля!");
+            }
+        }
+    }
+    public Player(string userName, int userLevel)
+    {
+        Nickname = userName;
+        Level = userLevel;
+    }
+    public virtual void Info()
+    {
+        Console.WriteLine($"Я гравець {this.Nickname}, мій рівень {this.level}.");
+    }
+    public void LevelUp() 
+    {
+        this.level++;
+        Console.WriteLine($"Рівень піднято! Тепер рівень: {this.level}");
+    }
+}
+
+class Admin : Player
+{
+    public string Role { get; set; } = "Moderator";
+    public Admin(string userName, int userLevel, string adminRole) : base(userName, userLevel)
+    {
+        Role = adminRole;
+    }
+    public override void Info()
+    {
+        Console.WriteLine($"Я адмін {Nickname}, мій рівень {Level} та моя роль {Role}");
+    }
+}
