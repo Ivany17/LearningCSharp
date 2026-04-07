@@ -1,0 +1,95 @@
+Тема №42: Запис у справжній файл (.json) 💾
+Виводити JSON у консоль — це добре, але справжня магія починається тоді, коли ми зберігаємо ці дані на диск. 
+Це дозволяє гравцеві закрити гру, вимкнути комп'ютер, а наступного дня повернутися і продовжити з того ж місця.
+
+‼️ Для роботи з файлами в C# використовується клас File із простору імен System.IO.
+
+⚠️ Як це працює:
+
+📚 Додай вгорі: using System.IO;
+Використовуй команду: File.WriteAllText("save.json", jsonString);
+
+Цей рядок створить у папці з твоїм проєктом файл save.json і запише туди весь твій текст.
+
+📝 Завдання №42:
+Давай створимо твоє перше справжнє "збереження".
+Додай using System.IO; на самому початку коду.
+Залиш серіалізацію твого myPlayer у рядок jsonString.
+Запиши цей рядок у файл за допомогою:
+File.WriteAllText("player_save.json", jsonString);
+Додай рядок Console.WriteLine("Дані успішно збережено у файл!");.
+Після запуску програми: подивися у ліву панель VS Code (провідник файлів). 
+Там має з'явитися новий файл player_save.json. Відкрий його і переконайся, що там лежать дані твого IvanY1.
+
+✅ Рішення:
+//У файлі Program.cs
+using System.Collections.Generic;
+using System.Text.Json;
+using System.IO;
+
+Player myPlayer = new Player("IvanY1", 10);
+Admin myAdmin = new Admin("Ivan_Moderator", 99, "Moderator");
+
+List<Player> team = new List<Player>();
+team.Add(myPlayer);
+team.Add(myAdmin);
+
+//Серіалізація
+string jsonString = JsonSerializer.Serialize(myPlayer);
+Console.WriteLine(jsonString);
+
+//Створити новий файл "player_save.json"
+File.WriteAllText("player_save.json", jsonString); // в боковій панелі має з'явитися новий файл "player_save.json"
+Console.WriteLine("Дані успішно збережено у файл!");
+
+class Player
+{
+    public string Nickname { get; set; } = "NoName"; // додаємо (= "NoName") аби зникли жовті рядки помилок
+    private int level;
+    public int Level
+    {
+        get { return level; }
+        set
+        {
+            if(value > 0)
+            {
+                level = value;
+            } else
+            {
+                Console.WriteLine("Помилка! Рівень має бути більше нуля!");
+            }
+        }
+    }
+    public Player() {}
+    public Player(string userName, int userLevel)
+    {
+        Nickname = userName;
+        Level = userLevel;
+    }
+    public virtual void Info()
+    {
+        Console.WriteLine($"Я гравець {this.Nickname}, мій рівень {this.level}.");
+    }
+    public void LevelUp() 
+    {
+        this.level++;
+        Console.WriteLine($"Рівень піднято! Тепер рівень: {this.level}");
+    }
+}
+
+class Admin : Player
+{
+    public string Role { get; set; } = "Moderator";
+    public Admin(string userName, int userLevel, string adminRole) : base(userName, userLevel)
+    {
+        Role = adminRole;
+    }
+    public override void Info()
+    {
+        Console.WriteLine($"Я адмін {Nickname}, мій рівень {Level} та моя роль {Role}");
+    }
+}
+
+
+//У файлі player_save.json
+{"Nickname":"IvanY1","Level":10}
