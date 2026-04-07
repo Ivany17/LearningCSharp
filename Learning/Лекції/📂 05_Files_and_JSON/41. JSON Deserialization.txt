@@ -1,0 +1,123 @@
+⁉️ Bиникла помилка InvalidOperationException? 🕵️‍♂️
+Подивися на текст помилки: "Each parameter in the deserialization constructor on type 'Player' must bind to an object property..."
+У тебе в класі Player є конструктор з параметрами (той, що приймає userName та userLevel). Коли JsonSerializer намагається створити 
+об'єкт із тексту, він "губиться", бо не знає, як поєднати назви в JSON (nickname, Level) з назвами в конструкторі (userName, userLevel). 
+Вони не збігаються!
+⚠️ Як це виправити?
+Є два основні способи "подружити" клас із JSON:
+
+1️⃣ Спосіб №1: Порожній конструктор (найпростіший)
+Додай у клас Player ще один конструктор — порожній. JSON-серіалізатор обожнює порожні конструктори, 
+бо він спочатку створює "пустий" об'єкт, а потім сам заповнює його властивості.
+
+public Player() { } // Просто порожні дужки
+
+2️⃣ Спосіб №2: Зробити назви параметрів однаковими
+Зміни назви параметрів у конструкторі, щоб вони точно збігалися з назвами властивостей (регістр не має значення):
+
+public Player(string nickname, int level) // тепер назви такі ж, як у властивостей
+{
+    this.nickname = nickname;
+    this.Level = level;
+}
+
+🔧 Для десеріалізації об'єкта Player:
+Player? importedPlayer = JsonSerializer.Deserialize<Player>(newPlayerData);
+
+📜 Для десеріалізації списку List<Player>:
+List<Player>? loadedTeam = JsonSerializer.Deserialize<List<Player>>(fileData);
+
+🧮 Приклад виконання простого коду на серіалізацію і на десеріалізацію об'єкта User
+User me = new User { Name = "Ivan", Age = 25 };
+
+// Serialization 
+var options = new JsonSerializerOptions { WriteIndented = true };
+string jsonString = JsonSerializer.Serialize(me, options);
+Console.WriteLine(jsonString);
+
+// Deserialization
+// Використовуємо Generics <User>, щоб пояснити програмі, у що саме перетворювати текст
+User? restoredUser = JsonSerializer.Deserialize<User>(jsonString); // створюємо нову зміну restoredUser, куди треба десеріалізувати файл
+Console.WriteLine($"Відновлене ім'я: {restoredUser?.Name}");
+
+class User
+{
+    public string Name { get; set; } = "";
+    public int Age { get; set; }
+}
+
+📝 Завдання №41: Десеріалізація (Оживлення об'єкта)
+Давай спробуємо зробити зворотний процес: перетворити текст JSON назад у справжнього гравця.
+Створи рядок з даними "нового" гравця вручну:
+string newPlayerData = "{\"nickname\":\"ProPlayer\",\"Level\":50}";
+Перетвори цей текст на об'єкт типу Player:
+Player importedPlayer = JsonSerializer.Deserialize<Player>(newPlayerData);
+Виведи в консоль: "Ім'я імпортованого гравця: {importedPlayer.nickname}".
+
+✅ Рішення:
+using System.Collections.Generic;
+using System.Text.Json;
+
+Player myPlayer = new Player("IvanY1", 10);
+Admin myAdmin = new Admin("Ivan_Moderator", 99, "Moderator");
+
+List<Player> team = new List<Player>();
+team.Add(myPlayer);
+team.Add(myAdmin);
+
+//Серіалізація
+string jsonString = JsonSerializer.Serialize(myPlayer);
+Console.WriteLine(jsonString);
+
+//Десеріалізація
+string newPlayerData = "{\"Nickname\":\"ProPlayer\",\"Level\":50}";
+Player? importedPlayer = JsonSerializer.Deserialize<Player>(newPlayerData); // додаємо (?) аби зникли жовті рядки помилок
+Console.WriteLine($"Ім'я імпортованого гравця: {importedPlayer?.Nickname ?? "Невідомо"}"); // в терміналі: "Ім'я імпортованого гравця: ProPlayer" | додаємо (?.Nickname ?? "Невідомо") аби зникли жовті рядки помилок
+
+class Player
+{
+    public string Nickname { get; set; } = "NoName"; // додаємо (= "NoName") аби зникли жовті рядки помилок
+    private int level;
+    public int Level
+    {
+        get { return level; }
+        set
+        {
+            if(value > 0)
+            {
+                level = value;
+            } else
+            {
+                Console.WriteLine("Помилка! Рівень має бути більше нуля!");
+            }
+        }
+    }
+    public Player() {} // створюємо пустий конструктор, аби десеріалізація спрацювала
+    public Player(string userName, int userLevel)
+    {
+        Nickname = userName;
+        Level = userLevel;
+    }
+    public virtual void Info()
+    {
+        Console.WriteLine($"Я гравець {this.Nickname}, мій рівень {this.level}.");
+    }
+    public void LevelUp() 
+    {
+        this.level++;
+        Console.WriteLine($"Рівень піднято! Тепер рівень: {this.level}");
+    }
+}
+
+class Admin : Player
+{
+    public string Role { get; set; } = "Moderator";
+    public Admin(string userName, int userLevel, string adminRole) : base(userName, userLevel)
+    {
+        Role = adminRole;
+    }
+    public override void Info()
+    {
+        Console.WriteLine($"Я адмін {Nickname}, мій рівень {Level} та моя роль {Role}");
+    }
+}
