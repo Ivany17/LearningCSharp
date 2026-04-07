@@ -1,0 +1,81 @@
+Тема №46: Перевірка існування файлу (File.Exists) 🚀 
+📂 Що це таке?
+Це метод, який дозволяє програмі дізнатися, чи є файл на диску, ДО того, як намагатися його прочитати. 
+Це допомагає уникнути «аварійної зупинки» програми.
+
+✅ Навіщо це потрібно?
+Перший запуск: Коли користувач щойно встановив програму, файлу бази даних ще немає. Ми можемо його створити автоматично.
+Стабільність: Ми не викликаємо помилку FileNotFoundException там, де можна просто використати звичайну умову if.
+
+🛠️ Як це працює (Синтаксис):
+Метод знаходиться в системі System.IO і повертає true (якщо файл є) або false (якщо немає).
+
+if (File.Exists("users.json"))
+{
+    // Файл знайдено! Можна читати.
+}
+else
+{
+    // Файлу немає. Треба або попередити, або створити новий.
+}
+
+⚠️ Важливо: File.Exists перевіряє тільки наявність файлу. Він не знає, чи правильний там JSON — 
+для цього ми все одно використовуємо try-catch всередині блоку if.
+
+📝 Завдання №46: «Автоматична база даних»
+Напиши код, який діє як інтелектуальна система:
+Крок 1: Перевір, чи існує файл users.json.
+Крок 2 (Якщо файлу НЕМАЄ):
+Виведи в консоль: 📢 "Файлу не знайдено! Створюю нову базу даних...".
+Створи новий List<User>, додай туди одного користувача (себе).
+Серіалізуй цей список і запиши у файл users.json.
+Крок 3 (Якщо файл Є):
+Виведи: 📂 "Файл знайдено. Завантажую дані...".
+Використай try-catch, щоб прочитати файл та десеріалізувати його.
+Якщо все добре — виведи імена користувачів через foreach.
+Як перевірити:
+Видали файл users.json з папки й запусти — програма має створити його.
+Запусти знову, нічого не видаляючи — програма має просто вивести список.
+
+✅ Рішення:
+//У файлі Program.cs
+using System.Collections.Generic;
+using System.Text.Json;
+using System.IO;
+
+List<User> users = new List<User>();
+users.Add(new User{Name = "Ivan", Age = 25});
+users.Add(new User{Name = "Maria", Age = 27});
+users.Add(new User{Name = "Alex", Age = 22});
+
+if (File.Exists("users.json"))
+{
+    Console.WriteLine("📂 Файл знайдено. Завантажую дані...");
+    try
+    {
+        string readedString = File.ReadAllText("users.json"); // читаємо з файлу users.json, який було створено заздалегідь в минулому
+        List<User>? loadedString = JsonSerializer.Deserialize <List<User>>(readedString);
+        foreach(var name in loadedString ?? new List<User>())
+        {
+            Console.WriteLine(name.Name); // якщо файл users.json знайдено - програма покаже дані зі списку users
+        }
+    } catch(Exception ex)
+    {
+        Console.WriteLine("Помилка! Не вдалося прочитати базу даних.");
+        Console.WriteLine($"Причина: {ex.Message}");
+    }
+} else
+{
+    Console.WriteLine("📢 Файлу не знайдено! Створюю нову базу даних...");
+    List<User> newUsers = new List<User>(); // якщо файл users.json не знайдено - створюємо новий список newUsers
+    newUsers.Add(new User{Name = "Ivan", Age = 25});
+    var options = new JsonSerializerOptions { WriteIndented = true };
+    string stringJson = JsonSerializer.Serialize(newUsers, options);
+    File.WriteAllText("users.json", stringJson); // створюємо оновлений файл users.json, після повторного запуску програма покаже саме його
+}
+
+class User
+{
+    public string Name { get; set; } = "";
+    public int Age { get; set; }
+}

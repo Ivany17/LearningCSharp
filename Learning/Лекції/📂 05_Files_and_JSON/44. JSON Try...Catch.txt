@@ -1,0 +1,124 @@
+Тема №44: Обробка винятків (Try...Catch) 🛡️
+Зараз твій код працює ідеально, але що буде, якщо хтось видалить файл player_save.json вручну, а ти спробуєш його прочитати? 
+Програма миттєво «вилетить» із критичною помилкою (Crash).
+
+Щоб цього не сталося, програмісти використовують блок try...catch. Це як «подушка безпеки» для коду.
+
+⚠️ Як це працює:
+
+try — ми кажемо: «Спробуй виконати цей небезпечний код».
+catch — ми кажемо: «Якщо сталася помилка, не падай, а зроби ось це (наприклад, виведи попередження)».
+
+try 
+{
+    string data = File.ReadAllText("missing_file.json");
+}
+catch (Exception ex)
+{
+    Console.WriteLine("Сталася помилка: Файл не знайдено!");
+}
+
+⁉️ Порада: в catch краще використовуй {ex.Message}
+Звідки взялися ex та Message?
+Це як заповнення бланка. Коли ти пишеш блок catch, ти оголошуєш "змінну для помилки":
+Exception — це тип даних (як int або string). Він означає будь-яку помилку, яка може статися в C#.
+ex — це ім'я змінної, яку ти сам створюєш (ти міг би назвати її error або myMistake). 
+Коли стається збій, C# "записує" всю інформацію про нього в цю змінну.
+.Message — це властивість всередині об'єкта ex. Вона містить зрозумілий текст помилки (наприклад: "Файл не знайдено").
+
+Простою мовою: catch (Exception ex) — це як сітка для метеликів. Коли вилітає помилка ("метелик"), 
+ти ловиш її в сітку ex і дивишся на її ярлик Message.
+
+📝 Завдання №44:
+Давай зробимо твою систему завантаження невразливою.
+Огорни свій код читання та десеріалізації у блок try.
+Додай блок catch (Exception ex).
+Всередині catch виведи повідомлення: "Помилка завантаження: Файл пошкоджено або видалено!".
+Для перевірки: Тимчасово зміни назву файлу в коді на якусь неіснуючу (наприклад, broken_save.json) і запусти програму.
+Ти побачиш, що замість червоного тексту помилки програма просто ввічливо попередить тебе, що щось не так.
+
+✅ Рішення:
+//У файлі Program.cs
+using System.Collections.Generic;
+using System.Text.Json;
+using System.IO;
+
+Player myPlayer = new Player("IvanY1", 10);
+Admin myAdmin = new Admin("Ivan_Moderator", 99, "Moderator");
+
+List<Player> team = new List<Player>();
+team.Add(myPlayer);
+team.Add(myAdmin);
+
+try 
+{
+    //Серіалізація
+    string jsonString = JsonSerializer.Serialize(myPlayer);
+    Console.WriteLine(jsonString);
+
+    //Створити новий файл "player_save.json"
+    //File.WriteAllText("player_save.json", jsonString); коментуємо, аби створити помилку
+    //Console.WriteLine("Дані успішно збережено у файл!"); коментуємо, аби створити помилку
+
+    //Читання з файлу
+    string fileContent = File.ReadAllText("ghost_save.json"); // викликаємо НЕІСНУЮЧИЙ файл, аби створити помилку
+    Player? loadedPlayer = JsonSerializer.Deserialize<Player>(fileContent);  // додаємо (?) аби зникли жовті рядки помилок
+    Console.WriteLine($"Гравця успішно завантажено! Вітаємо знову, {loadedPlayer?.Nickname ?? "Невідомо"}!"); // додаємо (?.Nickname ?? "Невідомо") аби зникли жовті рядки помилок
+}
+catch (Exception ex)
+{
+    // Додаємо ex.Message, щоб побачити суть проблеми
+    Console.WriteLine($"Помилка завантаження: {ex.Message}"); // з'явиться у випадку помилки
+}
+
+class Player
+{
+    public string Nickname { get; set; } = "NoName"; // додаємо (= "NoName") аби зникли жовті рядки помилок
+    private int level;
+    public int Level
+    {
+        get { return level; }
+        set
+        {
+            if(value > 0)
+            {
+                level = value;
+            } else
+            {
+                Console.WriteLine("Помилка! Рівень має бути більше нуля!");
+            }
+        }
+    }
+    public Player() {}
+    public Player(string userName, int userLevel)
+    {
+        Nickname = userName;
+        Level = userLevel;
+    }
+    public virtual void Info()
+    {
+        Console.WriteLine($"Я гравець {this.Nickname}, мій рівень {this.level}.");
+    }
+    public void LevelUp() 
+    {
+        this.level++;
+        Console.WriteLine($"Рівень піднято! Тепер рівень: {this.level}");
+    }
+}
+
+class Admin : Player
+{
+    public string Role { get; set; } = "Moderator";
+    public Admin(string userName, int userLevel, string adminRole) : base(userName, userLevel)
+    {
+        Role = adminRole;
+    }
+    public override void Info()
+    {
+        Console.WriteLine($"Я адмін {Nickname}, мій рівень {Level} та моя роль {Role}");
+    }
+}
+
+
+//У файлі player_save.json
+{"Nickname":"IvanY1","Level":10}
