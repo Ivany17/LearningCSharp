@@ -157,4 +157,4 @@ Console.WriteLine($"Через два тижні буде {inTwoWeeks}");
 var yesterday = now.AddDays(-1);
 Console.WriteLine($"Вчора було {yesterday}");
 DateTime myBirthday = new DateTime(2026, 10, 31);
-Console.WriteLine($"Ти святкуєш свій День народження у {myBirthday.DayOfWeek}");
+Console.WriteLine($"Ти святкуєш свій День народження у {myBirthday.DayOfWeek}"); 
