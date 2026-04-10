@@ -1,0 +1,157 @@
+Тема №49: Різниця в часі (TimeSpan) ⏱️
+Коли ти віднімаєш одну дату від іншої, ти отримуєш не число і не рядок, а спеціальний об'єкт — TimeSpan. Це "відрізок часу". 
+Він зберігає інформацію про те, скільки між двома датами пройшло днів, годин, хвилин і секунд.
+Якщо DateTime каже: "Зараз 19:00", то TimeSpan каже: "Минуло 2 години".
+
+Ти можеш використовувати TimeSpan, щоб:
+Вираховувати інтервали між замірами температури чи споживання енергії.
+Автоматично визначати, чи не застаріли дані (наприклад, якщо з останнього заміру пройшло понад 24 години).
+
+🛠️ Як створити TimeSpan?
+Через віднімання дат:
+TimeSpan result = date2 - date1;
+
+Вручну:
+// (дні, години, хвилини, секунди)
+TimeSpan interval = new TimeSpan(1, 12, 30, 0); // 1 день, 12 годин і 30 хвилин
+
+🔑 Головні властивості:
+.Days, .Hours, .Minutes — повертають цілу частину (наприклад, скільки залишилося годин понад повні дні).
+.TotalDays, .TotalHours, .TotalMinutes — повертають загальну кількість часу в цих одиницях (з дробами).
+
+‼️ Маленька підказка:
+У TimeSpan є дві схожі властивості, не переплутай їх:
+.Seconds — показує лише залишок секунд (від 0 до 59).
+.TotalSeconds — показує взагалі всі секунди, що пройшли (наприклад, 125,4). Для стажу нам краще підходить TotalSeconds.
+
+📝 Завдання №49: "Стаж гравця"
+Давай дізнаємося, скільки часу пройшло з моменту створення твого акаунта IvanY1 [cite: 2026-01-12] до цієї секунди.
+
+У блоці try після виведення дати реєстрації створи нову змінну типу TimeSpan:
+TimeSpan accountAge = DateTime.Now - myPlayer.CreatedAt;
+
+Виведи в консоль, скільки секунд ти вже "в грі":
+Console.WriteLine($"Ваш стаж у секундах: {accountAge.TotalSeconds}");
+
+✅ Рішення:
+//У файлі Program.cs
+using System.Collections.Generic;
+using System.Text.Json;
+using System.IO;
+
+Player myPlayer = new Player("IvanY1", 10, DateTime.Now);
+Admin myAdmin = new Admin("Ivan_Moderator", 99, DateTime.Now, "Moderator");
+
+List<Player> team = new List<Player>();
+team.Add(myPlayer);
+team.Add(myAdmin);
+
+try 
+{
+    //Робимо файл JSON більш красивим разом з відступами і дужками
+    var options = new JsonSerializerOptions { WriteIndented = true };
+
+    //Серіалізація
+    string teamJson = JsonSerializer.Serialize(team, options); // серіалізуємо команду
+    string playerJson = JsonSerializer.Serialize(myPlayer, options); // серыалызуэмо одного гравця
+
+    //Створити новий файл "all_players_list.json"
+    File.WriteAllText("all_players_list.json", teamJson); // в бічній панелі створиться файл all_players_list.json
+    Console.WriteLine("Команду успішно збережено у файл 'all_players_list.json'!");
+
+    //Читання з файлу
+    string fileData = File.ReadAllText("all_players_list.json");
+    
+    //Десеріалізація
+    List<Player>? loadedTeam = JsonSerializer.Deserialize<List<Player>>(fileData); // додаємо (?) аби зникли жовті рядки помилок
+
+    // 5. ПЕРЕВІРКА: Виводимо ім'я першого гравця зі списку
+    Console.WriteLine($"Перший гравець у списку: {loadedTeam?[0].Nickname ?? "Невідомо"}"); // додаємо (?) аби зникли жовті рядки помилок
+    
+    // Визначаємо дату та час за допомогою .ToString
+    Console.WriteLine($"Дата реєстрації: {myPlayer.CreatedAt.ToString("dd MMMM yyyy, HH:mm")}"); // в консолі "Дата реєстрації: 28 лютого 2026, 14:51"
+
+    // Визначаємо за допомогою TimeSpan різницю часу, скільки секунд пройшло з моменту створення мого акаунта 
+    System.Threading.Thread.Sleep(3000); // Програма "засне" на 3 секунди
+    TimeSpan accountAge = DateTime.Now - myPlayer.CreatedAt;
+    Console.WriteLine($"Ваш стаж у секундах: {accountAge.TotalSeconds}"); // в консолі "Ваш стаж у секундах: 3,0629866"
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Упс! Щось пішло не так: {ex.Message}");
+}
+
+class Player
+{
+    public string Nickname { get; set; } = "NoName"; // додаємо (= "NoName") аби зникли жовті рядки помилок
+    private int level;
+    public int Level
+    {
+        get { return level; }
+        set
+        {
+            if(value > 0)
+            {
+                level = value;
+            } else
+            {
+                Console.WriteLine("Помилка! Рівень має бути більше нуля!");
+            }
+        }
+    }
+    public DateTime CreatedAt { get; set; }
+    public Player() {}
+    public Player(string userName, int userLevel, DateTime time)
+    {
+        Nickname = userName;
+        Level = userLevel;
+        CreatedAt = time;
+    }
+    public virtual void Info()
+    {
+        Console.WriteLine($"Я гравець {this.Nickname}, мій рівень {this.level}.");
+    }
+    public void LevelUp() 
+    {
+        this.level++;
+        Console.WriteLine($"Рівень піднято! Тепер рівень: {this.level}");
+    }
+}
+
+class Admin : Player
+{
+    public string Role { get; set; } = "Moderator";
+    public Admin(string userName, int userLevel,  DateTime time, string adminRole) : base(userName, userLevel, time)
+    {
+        Role = adminRole;
+    }
+    public override void Info()
+    {
+        Console.WriteLine($"Я адмін {Nickname}, мій рівень {Level} та моя роль {Role}");
+    }
+}
+
+🚀 Завдання №49: «Таймер подій»
+Створи дату Нового року (1 січня наступного року).
+Створи дату зараз (DateTime.Now).
+Відніми "зараз" від "Нового року", щоб отримати TimeSpan.
+Виведи в консоль:
+Скільки цілих днів залишилося до свята.
+Скільки всього годин залишилося (використай TotalHours і округли через Math.Round, який ми вчили раніше).
+Додатково: Створи свій власний TimeSpan (наприклад, тривалість уроку 45 хвилин) і додай його до поточного 
+часу за допомогою now.Add(твійTimeSpan).
+
+✅ Рішення:
+//У файлі Program.cs
+using System.Collections.Generic;
+using System.Text.Json;
+using System.IO;
+using System.Globalization;
+
+DateTime now = DateTime.Now;
+DateTime newYear = new DateTime(2027, 1, 1);;
+TimeSpan interval = newYear - DateTime.Now;
+Console.WriteLine($"До {newYear} залишилося {interval.Days} днів");
+Console.WriteLine($"До {newYear} залишилося {Math.Round(interval.TotalHours)} годин");
+TimeSpan mySpan = new TimeSpan(0, 0, 45, 0);
+Console.WriteLine($"Через 45 хвилин буде {now.Add(mySpan)}");
