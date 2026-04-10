@@ -1,0 +1,160 @@
+Тема №47: Робота з датою та часом (DateTime) ⏳
+У C# для роботи з часом існує спеціальний тип даних — DateTime. Це не просто текст, це об'єкт, який знає все про роки, 
+місяці, дні та навіть мілісекунди.
+
+‼️ Найголовніша команда:
+Щоб отримати поточний момент часу (прямо зараз), використовують:
+DateTime now = DateTime.Now;
+
+DateTime.Now — це «команда» класу, яка створює новий об'єкт із поточним часом.
+now.Year — це звернення до конкретної цифри всередині вже створеного об'єкта now.
+
+⚠️ Як це виглядає в JSON:
+Коли ми серіалізуємо DateTime, він автоматично перетворюється на стандартний міжнародний формат (ISO 8601), наприклад: "2026-02-28T10:11:00".
+
+📝 Завдання №47: "Дата народження персонажа"
+Давай додамо нашому класу Player пам'ять про те, коли він був створений.
+
+У класі Player додай нову властивість:
+public DateTime CreatedAt { get; set; }
+
+У конструкторі або при створенні нового об'єкта myPlayer признач йому поточний час:
+myPlayer.CreatedAt = DateTime.Now;
+
+Серіалізуй цей об'єкт у JSON і виведи в консоль.
+
+Спробуй також вивести в консоль лише рік створення, використавши властивість .Year:
+Console.WriteLine($"Рік створення: {myPlayer.CreatedAt.Year}");
+
+Чому це важливо:
+Тепер у твоєму файлі збереження буде чітко зафіксовано час гри. Це основа для систем щоденних бонусів, 
+журналів подій або просто відображення дати останнього сейву.
+
+✅ Рішення:
+//У файлі Program.cs
+using System.Collections.Generic;
+using System.Text.Json;
+using System.IO;
+
+Player myPlayer = new Player("IvanY1", 10, DateTime.Now);
+Admin myAdmin = new Admin("Ivan_Moderator", 99, DateTime.Now, "Moderator");
+
+List<Player> team = new List<Player>();
+team.Add(myPlayer);
+team.Add(myAdmin);
+
+try 
+{
+    //Робимо файл JSON більш красивим разом з відступами і дужками
+    var options = new JsonSerializerOptions { WriteIndented = true };
+
+    //Серіалізація
+    string teamJson = JsonSerializer.Serialize(team, options); // серіалізуємо команду
+    string playerJson = JsonSerializer.Serialize(myPlayer, options); // серыалызуэмо одного гравця
+
+    //Створити новий файл "all_players_list.json"
+    File.WriteAllText("all_players_list.json", teamJson); // в бічній панелі створиться файл all_players_list.json
+    Console.WriteLine("Команду успішно збережено у файл 'all_players_list.json'!");
+
+    //Читання з файлу
+    string fileData = File.ReadAllText("all_players_list.json");
+    
+    //Десеріалізація
+    List<Player>? loadedTeam = JsonSerializer.Deserialize<List<Player>>(fileData); // додаємо (?) аби зникли жовті рядки помилок
+
+    // 5. ПЕРЕВІРКА: Виводимо ім'я першого гравця зі списку
+    Console.WriteLine($"Перший гравець у списку: {loadedTeam?[0].Nickname ?? "Невідомо"}"); // додаємо (?) аби зникли жовті рядки помилок
+    Console.WriteLine($"Рік створення: {myPlayer.CreatedAt.Year}");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Упс! Щось пішло не так: {ex.Message}");
+}
+
+class Player
+{
+    public string Nickname { get; set; } = "NoName"; // додаємо (= "NoName") аби зникли жовті рядки помилок
+    private int level;
+    public int Level
+    {
+        get { return level; }
+        set
+        {
+            if(value > 0)
+            {
+                level = value;
+            } else
+            {
+                Console.WriteLine("Помилка! Рівень має бути більше нуля!");
+            }
+        }
+    }
+    public DateTime CreatedAt { get; set; }
+    public Player() {}
+    public Player(string userName, int userLevel, DateTime time)
+    {
+        Nickname = userName;
+        Level = userLevel;
+        CreatedAt = time;
+    }
+    public virtual void Info()
+    {
+        Console.WriteLine($"Я гравець {this.Nickname}, мій рівень {this.level}.");
+    }
+    public void LevelUp() 
+    {
+        this.level++;
+        Console.WriteLine($"Рівень піднято! Тепер рівень: {this.level}");
+    }
+}
+
+class Admin : Player
+{
+    public string Role { get; set; } = "Moderator";
+    public Admin(string userName, int userLevel,  DateTime time, string adminRole) : base(userName, userLevel, time)
+    {
+        Role = adminRole;
+    }
+    public override void Info()
+    {
+        Console.WriteLine($"Я адмін {Nickname}, мій рівень {Level} та моя роль {Role}");
+    }
+}
+
+📝 Завдання №2: «Детектив часу»
+Напиши програму, яка:
+Створює змінну now і записує туди поточний час.
+Виводить у консоль окремо:
+Який зараз рік.
+Який зараз місяць (цифрою).
+Який сьогодні день тижня (назва англійською).
+Створює ще одну змінну для будь-якої важливої для тебе дати (наприклад, твій день народження або Новий рік 2027) і виводить її на екран.
+Візьми свою змінну now.
+Створи нову змінну inTwoWeeks і за допомогою методу .AddDays(14) додай до поточної дати два тижні.
+Створи змінну yesterday і за допомогою .AddDays(-1) (так, можна ставити мінус!) отримай вчорашню дату.
+Створи дату свого дня народження і виведи в консоль, який це буде день тижня (DayOfWeek).
+
+✅ Рішення:
+//У файлі Program.cs
+using System.Collections.Generic;
+using System.Text.Json;
+using System.IO;
+
+DateTime now = DateTime.Now;
+Console.WriteLine(now);
+int year = now.Year;
+int month = now.Month;
+var dayOfWeek = now.DayOfWeek;
+Console.WriteLine($"Рік: {year}");
+Console.WriteLine($"Місяць: {month}");
+Console.WriteLine($"День тижня: {dayOfWeek}");
+DateTime newYear = new DateTime (2026, 12, 31, 23, 59, 59); // year, month, day, hour, minute, second
+Console.WriteLine($"Новий рік буде {newYear}");
+Console.WriteLine("--- Маніпуляція часом ---");
+var inTwoWeeks = now.AddDays(14);
+Console.WriteLine($"Через два тижні буде {inTwoWeeks}");
+//Console.WriteLine($"Через два тижні буде {now.AddDays(14)}");
+var yesterday = now.AddDays(-1);
+Console.WriteLine($"Вчора було {yesterday}");
+DateTime myBirthday = new DateTime(2026, 10, 31);
+Console.WriteLine($"Ти святкуєш свій День народження у {myBirthday.DayOfWeek}");

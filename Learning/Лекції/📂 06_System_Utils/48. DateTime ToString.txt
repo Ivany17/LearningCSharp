@@ -1,0 +1,143 @@
+Тема №48: Форматування дати (.ToString)
+За замовчуванням DateTime виводиться дуже громіздко. Але в C# є метод .ToString(), у який можна передати "маску", 
+щоб залишити тільки те, що нам потрібно.
+
+🔑 Основні символи-ключі:
+d — день (7) | dd — день з нулем (07).
+M — номер місяця (4) | MM — номер з нулем (04).
+MMM — коротка назва (Apr) | MMMM — повна назва (April).
+yy — дві цифри року (26) | yyyy — чотири цифри (2026).
+HH — години (24-годинний формат) | mm — хвилини | ss — секунди.
+
+🌍 Культура (Локалізація)
+Ти помітив, що назви місяців виводяться англійською? Це тому, що C# за замовчуванням використовує "Invariant Culture" або налаштування системи. 
+Щоб отримати назву українською, потрібно підключити бібліотеку System.Globalization.
+
+using System.Globalization; // Додай це на самому початку файлу
+// Створюємо українську культуру
+var ukraine = new CultureInfo("uk-UA");
+
+📝 Завдання №48: "Гарна дата реєстрації"
+Давай оновимо твій код, щоб замість просто року він виводив повну інформацію про створення твого акаунта IvanY1 [cite: 2026-01-12].
+Знайди свій рядок:
+Console.WriteLine($"Рік створення: {myPlayer.CreatedAt.Year}");
+Заміни його на такий формат:
+Console.WriteLine($"Дата реєстрації: {myPlayer.CreatedAt.ToString("dd MMMM yyyy, HH:mm")}");
+
+Це виглядає значно краще, ніж просто набір цифр. 
+
+✅ Рішення:
+//У файлі Program.cs
+using System.Collections.Generic;
+using System.Text.Json;
+using System.IO;
+
+Player myPlayer = new Player("IvanY1", 10, DateTime.Now);
+Admin myAdmin = new Admin("Ivan_Moderator", 99, DateTime.Now, "Moderator");
+
+List<Player> team = new List<Player>();
+team.Add(myPlayer);
+team.Add(myAdmin);
+
+try 
+{
+    //Робимо файл JSON більш красивим разом з відступами і дужками
+    var options = new JsonSerializerOptions { WriteIndented = true };
+
+    //Серіалізація
+    string teamJson = JsonSerializer.Serialize(team, options); // серіалізуємо команду
+    string playerJson = JsonSerializer.Serialize(myPlayer, options); // серыалызуэмо одного гравця
+
+    //Створити новий файл "all_players_list.json"
+    File.WriteAllText("all_players_list.json", teamJson); // в бічній панелі створиться файл all_players_list.json
+    Console.WriteLine("Команду успішно збережено у файл 'all_players_list.json'!");
+
+    //Читання з файлу
+    string fileData = File.ReadAllText("all_players_list.json");
+    
+    //Десеріалізація
+    List<Player>? loadedTeam = JsonSerializer.Deserialize<List<Player>>(fileData); // додаємо (?) аби зникли жовті рядки помилок
+
+    // 5. ПЕРЕВІРКА: Виводимо ім'я першого гравця зі списку
+    Console.WriteLine($"Перший гравець у списку: {loadedTeam?[0].Nickname ?? "Невідомо"}"); // додаємо (?) аби зникли жовті рядки помилок
+    
+    // Визначаємо дату та час за допомогою .ToString
+    Console.WriteLine($"Дата реєстрації: {myPlayer.CreatedAt.ToString("dd MMMM yyyy, HH:mm")}");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Упс! Щось пішло не так: {ex.Message}");
+}
+
+class Player
+{
+    public string Nickname { get; set; } = "NoName"; // додаємо (= "NoName") аби зникли жовті рядки помилок
+    private int level;
+    public int Level
+    {
+        get { return level; }
+        set
+        {
+            if(value > 0)
+            {
+                level = value;
+            } else
+            {
+                Console.WriteLine("Помилка! Рівень має бути більше нуля!");
+            }
+        }
+    }
+    public DateTime CreatedAt { get; set; }
+    public Player() {}
+    public Player(string userName, int userLevel, DateTime time)
+    {
+        Nickname = userName;
+        Level = userLevel;
+        CreatedAt = time;
+    }
+    public virtual void Info()
+    {
+        Console.WriteLine($"Я гравець {this.Nickname}, мій рівень {this.level}.");
+    }
+    public void LevelUp() 
+    {
+        this.level++;
+        Console.WriteLine($"Рівень піднято! Тепер рівень: {this.level}");
+    }
+}
+
+class Admin : Player
+{
+    public string Role { get; set; } = "Moderator";
+    public Admin(string userName, int userLevel,  DateTime time, string adminRole) : base(userName, userLevel, time)
+    {
+        Role = adminRole;
+    }
+    public override void Info()
+    {
+        Console.WriteLine($"Я адмін {Nickname}, мій рівень {Level} та моя роль {Role}");
+    }
+}
+
+📝 Завдання №2: «Майстер Форматів»
+Давай пограємося з виводом. Напиши програму, яка:
+Бере поточний час (DateTime.Now).
+Виводить його у трьох різних стилях:
+Стиль "Цифровий": день.місяць.рік (наприклад, 09.04.2026).
+Стиль "Час": тільки години та хвилини (наприклад, 18:30).
+Стиль "Словами": повна назва місяця та рік (наприклад, April 2026).
+Бонусне завдання: Спробуй підключити CultureInfo і вивести назву сьогоднішнього дня тижня українською мовою.
+
+✅ Рішення:
+//У файлі Program.cs
+using System.Collections.Generic;
+using System.Text.Json;
+using System.IO;
+using System.Globalization;
+
+DateTime now = DateTime.Now;
+Console.WriteLine(now);
+var ukraine = new CultureInfo("uk-UA");
+Console.WriteLine(now.ToString("dd.MM.yyyy"));
+Console.WriteLine(now.ToString("HH:mm"));
+Console.WriteLine(now.ToString("MMMM, yyyy"));
