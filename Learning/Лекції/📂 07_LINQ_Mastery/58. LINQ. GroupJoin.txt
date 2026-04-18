@@ -1,0 +1,187 @@
+Тема №58. LINQ: Групове об'єднання (GroupJoin)
+Оскільки ти засвоїв Join, час перейти до його "старшого брата" — GroupJoin.
+
+Теорія:
+Якщо Join створює плаский список (одна пара = один рядок), то GroupJoin створює ієрархію. 
+Він бере об'єкт з першого списку і приєднує до нього цілу колекцію збігів із другого списку.
+
+📝 Завдання №58: "Реєстр міст та їх об'єктів"
+Давай зробимо так: у нас буде список міст, і ми хочемо побачити, які квартири у нас є в кожному місті.
+Створи список міст (просто List<string> myCities = new List<string> { "Novara", "Vercelli", "Milan" };).
+
+Застосуй GroupJoin:
+Об'єднуй myCities із buildings.
+
+Ключ для міста — сам рядок (місто).
+Ключ для квартири — властивість .City.
+Результат: Виведи назву міста, а під ним — номери всіх квартир, які до нього відносяться.
+
+Зверни увагу: Якщо у місті Milan немає квартир, GroupJoin все одно залишить це місто у списку, але колекція квартир для нього буде порожньою.
+
+✅ Рішення:
+//У файлі Program.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+List<string> myCities = new List<string> { "Novara", "Vercelli", "Milan" };
+
+List<Owner> owners = new List<Owner>
+{
+    new Owner { Name = "Maria", ApartmentNumber = 105},
+    new Owner { Name = "Marco", ApartmentNumber = 76},
+    new Owner { Name = "Luka", ApartmentNumber = 114},
+    new Owner { Name = "Giulia", ApartmentNumber = 37},
+};
+
+List<Apartment> buildings = new List<Apartment>
+{
+    new Apartment
+    {
+        Number = 12,
+        City = "Novara",
+        EnergyConsumption = 87.3,
+        isOccupied = false,
+        MonthlyEnergyBill = {1, 2, 3}
+    },
+    new Apartment
+    {
+        Number = 34,
+        City = "Biela",
+        EnergyConsumption = 110.1,
+        isOccupied = false,
+        MonthlyEnergyBill = {4, 5, 6}
+    },
+    new Apartment
+    {
+        Number = 114,
+        City = "Vercelli",
+        EnergyConsumption = 90.0,
+        isOccupied = true,
+        MonthlyEnergyBill = {7, 8, 9}
+    },
+        new Apartment
+    {
+        Number = 76,
+        City = "Alessandria",
+        EnergyConsumption = 56.2,
+        isOccupied = false,
+        MonthlyEnergyBill = {10, 11, 12}
+    },
+    new Apartment
+    {
+        Number = 80,
+        City = "Genova",
+        EnergyConsumption = 123.4,
+        isOccupied = false,
+        MonthlyEnergyBill = {13, 14, 15}
+    },
+    new Apartment
+    {
+        Number = 105,
+        City = "Novi Ligure",
+        EnergyConsumption = 156.7,
+        isOccupied = true,
+        MonthlyEnergyBill = {16, 17, 18}
+    },
+};
+
+var citiesApartments = myCities.GroupJoin(
+    buildings,                          // 1. Друга колекція
+    cit => cit,                         // 2. Ключ міста (Ключ для міста — сам рядок (місто), оскільки List<string> myCities)
+    build => build.City,                // 3. Ключ квартири: властивість City
+    (cityName, apartmentGroup) => new   // 4. Що створюємо
+    {
+        NameOfTheCity = cityName,
+        Numbers = apartmentGroup.Select(a => a.Number) // Витягуємо номери
+    }
+);
+
+foreach(var city in citiesApartments)
+{
+    Console.WriteLine($"Місто: {city.NameOfTheCity}");
+    // Використовуємо string.Join для красивого виводу номерів
+    // Давай просто закріпимо логіку тернарного оператора, щоб ти міг писати його сам:
+    // умова ? значення_якщо_так : значення_якщо_ні
+    Console.WriteLine($"  Квартири: {(city.Numbers.Any() ? string.Join(", ", city.Numbers) : "немає")}");
+    // Місто: Novara
+    //     Квартири: 12
+    // Місто: Vercelli
+    //     Квартири: 114
+    // Місто: Milan
+    //     Квартири: немає
+}
+
+public class Apartment
+{
+    public int Number { get; set; }
+    public string? City { get; set; }
+    public double EnergyConsumption { get; set; }
+    public bool isOccupied { get; set; }
+    public List<double> MonthlyEnergyBill { get; set; } = new List<double>();
+}
+
+public class Owner
+{
+    public string? Name { get; set; }
+    public int ApartmentNumber { get; set; } // Ключ для зв'язку
+}
+
+📝 Завдання №51: "Гараж власників"
+Тобі потрібно об'єднати ці два списки так, щоб для кожного власника було сформовано список його автомобілів.
+Твої умови:
+Використай список owners як головний.
+Застосуй .GroupJoin(), щоб приєднати список cars.
+Ключі для об'єднання: Id у власника та OwnerId у автомобіля.
+У фінальному Select створи анонімний об'єкт, який містить:
+OwnerName (ім'я власника).
+CarCount (кількість авто у цього власника).
+CarList (рядок з назвами всіх його машин через кому).
+
+✅ Рішення:
+//У файлі Program.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Diagnostics;
+
+// 1. Список власників
+var owners = new[]
+{
+    new { Id = 1, Name = "Олександр" },
+    new { Id = 2, Name = "Марія" },
+    new { Id = 3, Name = "Іван" }
+};
+
+// 2. Список автомобілів
+var cars = new[]
+{
+    new { Model = "Tesla Model 3", OwnerId = 1 },
+    new { Model = "BMW M4", OwnerId = 1 },
+    new { Model = "Audi A6", OwnerId = 2 },
+    new { Model = "Toyota Corolla", OwnerId = 2 },
+    new { Model = "Ford Mustang", OwnerId = 1 }
+};
+
+var groupJoin = owners.GroupJoin(
+            cars,
+            o => o.Id,
+            c => c.OwnerId,
+            (owner, groupOfTheCars) => new
+            {
+                OwnerName = owner.Name,
+                CarCount = groupOfTheCars.Count(),
+                CarList = groupOfTheCars.Select(c => c.Model)
+            }
+        );
+
+foreach(var car in groupJoin)
+{
+    Console.WriteLine($"У {car.OwnerName} {car.CarCount} машини: {(car.CarList.Any() ? string.Join(", ", car.CarList) : "немає машин")}");
+    // У Олександр 3 машини: Tesla Model 3, BMW M4, Ford Mustang
+    // У Марія 2 машини: Audi A6, Toyota Corolla
+    // У Іван 0 машини: немає машин
+}
