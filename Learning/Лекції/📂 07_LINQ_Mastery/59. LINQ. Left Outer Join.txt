@@ -1,0 +1,131 @@
+Тема №59. LINQ: Ліве зовнішнє об'єднання (Left Outer Join)
+Join — це коли дві речі "склеюються". Але Left Outer Join — це коли ми кажемо: 
+«Мені абсолютно все одно, чи є пара для об'єкта з лівого списку. Я хочу бачити його в результаті у будь-якому випадку».
+
+У C# ми робимо це у два етапи:
+1. GroupJoin: Створюємо "мішок" (групу) для кожного елемента.
+2. SelectMany + DefaultIfEmpty: Розпаковуємо цей мішок. Якщо він порожній, DefaultIfEmpty підставляє null, 
+щоб програма не викинула цей рядок з результату.
+
+Як виводити дані в Left Join (SelectMany):
+Для простих значень: item?.Name ?? "Нічого немає"
+Для складних рядків/логіки: item != null ? $"{item.Prop1} - {item.Prop2}" : "Альтернатива"
+
+📝 Завдання №59: "Повний реєстр міст (навіть порожніх)"
+Давай перетворимо твій попередній результат на плаский список.
+
+Твоє завдання:
+
+Візьми свій код із GroupJoin.
+Після закриття дужки GroupJoin, але перед крапкою з комою, додай .SelectMany(...).
+У SelectMany ми маємо сказати: "Візьми групу квартир, і якщо вона порожня — дай нам хоча б null".
+
+На відміну від GroupJoin, де Milan був одним рядком із написом "немає", тут кожен збіг буде окремим рядком. 
+А для Milan буде один рядок із прочерком.
+Підказка: Зверни увагу на знак питання в apartment?.Number. Оскільки для Milan apartment буде null, цей знак запобігає помилці (Crash) програми.
+
+✅ Рішення:
+//У файлі Program.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+List<string> myCities = new List<string> { "Novara", "Vercelli", "Milan" };
+
+List<Owner> owners = new List<Owner>
+{
+    new Owner { Name = "Maria", ApartmentNumber = 105},
+    new Owner { Name = "Marco", ApartmentNumber = 76},
+    new Owner { Name = "Luka", ApartmentNumber = 114},
+    new Owner { Name = "Giulia", ApartmentNumber = 37},
+};
+
+List<Apartment> buildings = new List<Apartment>
+{
+    new Apartment
+    {
+        Number = 12,
+        City = "Novara",
+        EnergyConsumption = 87.3,
+        isOccupied = false,
+        MonthlyEnergyBill = {1, 2, 3}
+    },
+    new Apartment
+    {
+        Number = 34,
+        City = "Biela",
+        EnergyConsumption = 110.1,
+        isOccupied = false,
+        MonthlyEnergyBill = {4, 5, 6}
+    },
+    new Apartment
+    {
+        Number = 114,
+        City = "Vercelli",
+        EnergyConsumption = 90.0,
+        isOccupied = true,
+        MonthlyEnergyBill = {7, 8, 9}
+    },
+        new Apartment
+    {
+        Number = 76,
+        City = "Alessandria",
+        EnergyConsumption = 56.2,
+        isOccupied = false,
+        MonthlyEnergyBill = {10, 11, 12}
+    },
+    new Apartment
+    {
+        Number = 80,
+        City = "Genova",
+        EnergyConsumption = 123.4,
+        isOccupied = false,
+        MonthlyEnergyBill = {13, 14, 15}
+    },
+    new Apartment
+    {
+        Number = 105,
+        City = "Novi Ligure",
+        EnergyConsumption = 156.7,
+        isOccupied = true,
+        MonthlyEnergyBill = {16, 17, 18}
+    },
+};
+
+var leftJoin = myCities.GroupJoin(
+    buildings,
+    cit => cit,
+    build => build.City,
+    (cityName, apartmentGroup) => new { cityName, apartmentGroup } // Тимчасовий об'єкт
+)
+.SelectMany(
+    x => x.apartmentGroup.DefaultIfEmpty(), // Розгортаємо групу
+    (x, apartment) => new // Формуємо фінальний результат
+    {
+        City = x.cityName,
+        ApartNumber = apartment?.Number.ToString() ?? "—" // Якщо null, ставимо прочерк
+    }
+);
+
+foreach (var item in leftJoin)
+{
+    Console.WriteLine($"Місто: {item.City} | Квартира: {item.ApartNumber}");
+    // Місто: Novara | Квартира: 12
+    // Місто: Vercelli | Квартира: 114
+    // Місто: Milan | Квартира: —  
+}
+
+public class Apartment
+{
+    public int Number { get; set; }
+    public string? City { get; set; }
+    public double EnergyConsumption { get; set; }
+    public bool isOccupied { get; set; }
+    public List<double> MonthlyEnergyBill { get; set; } = new List<double>();
+}
+
+public class Owner
+{
+    public string? Name { get; set; }
+    public int ApartmentNumber { get; set; } // Ключ для зв'язку
+}
