@@ -1,0 +1,150 @@
+Тема №53. LINQ: Групування даних (GroupBy)
+Теорія:
+Метод .GroupBy() розділяє колекцію на групи за певним ключем (наприклад, за містом, за станом заселеності або за категорією).
+
+На виході ми отримуємо не просто список, а колекцію груп. Кожна група має:
+.Key — значення, за яким ми групували (наприклад, назва міста).
+Самі елементи — список об'єктів, що потрапили в цю групу.
+
+📝 Завдання №53: "Статистика по містах"
+Давай використаємо твій список buildings, щоб побачити, скільки квартир у нас є в кожному конкретному місті. Тобі потрібно згрупувати їх за назвою міста.
+
+Твоє завдання:
+Створи змінну groupedApartments.
+Використай buildings.GroupBy(a => a.City).
+Виведи результат у консоль. Оскільки це групи, нам знадобиться вкладений цикл (цикл у циклі):
+Зовнішній цикл виводить назву міста (group.Key).
+Внутрішній цикл виводить номери квартир у цьому місті.
+
+✅ Рішення:
+//У файлі Program.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+List<Apartment> buildings = new List<Apartment>
+{
+    new Apartment
+    {
+        Number = 12,
+        City = "Novara",
+        EnergyConsumption = 87.3,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 34,
+        City = "Biela",
+        EnergyConsumption = 110.1,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 114,
+        City = "Vercelli",
+        EnergyConsumption = 90.0,
+        isOccupied = true
+    },
+        new Apartment
+    {
+        Number = 76,
+        City = "Alessandria",
+        EnergyConsumption = 56.2,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 80,
+        City = "Genova",
+        EnergyConsumption = 123.4,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 114,
+        City = "Novi Ligure",
+        EnergyConsumption = 156.7,
+        isOccupied = true
+    },
+};
+
+var groupedApartments = buildings.GroupBy(a => a.City);
+
+foreach (var group in groupedApartments)
+{
+    Console.WriteLine($"Місто: {group.Key}"); // Ключ — це назва міста
+    foreach (var apart in group)
+    {
+        Console.WriteLine($"  - Квартира № {apart.Number}");
+        //Місто: Novara
+        //- Квартира № 12
+        //Місто: Biela
+        //- Квартира № 34
+        //Місто: Vercelli
+        //- Квартира № 114
+        //Місто: Alessandria
+        //- Квартира № 76
+        //Місто: Genova
+        //- Квартира № 80
+        //Місто: Novi Ligure
+        //- Квартира № 114
+    }
+}
+
+public class Apartment
+{
+    public int Number { get; set; }
+    public string? City { get; set; }
+    public double EnergyConsumption { get; set; }
+    public bool isOccupied { get; set; }
+}
+
+
+
+Урок №44.1. LINQ: Проекція груп (GroupBy + Select)
+Теорія:
+Після використання .GroupBy(), ми отримуємо набір груп. За допомогою .Select() ми можемо перетворити кожну групу на новий об'єкт, 
+який містить лише ті дані, що нам цікаві (наприклад, назву міста та список номерів).
+Це робить код зручнішим для подальшого використання, бо нам не доведеться звертатися до group.Key — 
+ми самі створимо властивості з нормальними назвами.
+
+📝 Завдання №44.1: "Стислий звіт по об'єктах"
+Давай перепишемо твій попередній код так, щоб отримати список об'єктів, де є тільки назва міста та номери квартир.
+
+Твоє завдання:
+Додай до свого запиту .Select(...).
+Всередині Select створи анонімний тип (це об'єкт без імені класу, який створюється через new { ... }).
+Признач властивості: CityName = g.Key та FlatNumbers = g.Select(a => a.Number).
+
+Ось як має виглядати твій запит:
+C#
+
+var cityReport = buildings
+    .GroupBy(a => a.City)
+    .Select(g => new 
+    { 
+        CityName = g.Key, 
+        FlatNumbers = g.Select(a => a.Number).ToList() 
+    });
+
+foreach (var item in cityReport)
+{
+    // Тепер замість .Key ми використовуємо .CityName
+    Console.WriteLine($"Місто: {item.CityName}");
+    Console.WriteLine($"  Номери квартир: {string.Join(", ", item.FlatNumbers)}");
+    //Місто: Novara
+    //Номери квартир: 12
+    //Місто: Biela
+    //Номери квартир: 34
+    //Місто: Vercelli
+    //Номери квартир: 114
+    //Місто: Alessandria
+    //Номери квартир: 76
+    //Місто: Genova
+    //Номери квартир: 80
+    //Місто: Novi Ligure
+    //Номери квартир: 114
+}
+Чому це круто?
+Чистота: Ти витягнув лише int (номери) замість усього об'єкта Apartment.
+Зручність: Метод string.Join дозволяє вивести всі номери в один рядок через кому, що виглядає набагато акуратніше в консолі.
