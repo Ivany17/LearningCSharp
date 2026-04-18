@@ -1,0 +1,230 @@
+Тема №57. LINQ: Внутрішнє об'єднання (Inner Join)
+Теорія:
+Метод .Join() використовується для того, щоб з'єднати дві різні колекції за спільним ключем (наприклад, ID власника або назва міста).
+
+Inner Join працює за принципом "спільного знаменника": у фінальний результат потраплять лише ті елементи, 
+які мають пару в обох списках. Якщо для квартири не знайдено власника (або навпаки), цей об'єкт просто ігнорується.
+
+Параметри методу .Join():
+Друга колекція, з якою ми з'єднуємося.
+Ключ першої колекції (селектор ключа для "лівої" сторони).
+Ключ другої колекції (селектор ключа для "правої" сторони).
+Результат — функція, яка визначає, як виглядатиме новий об'єкт (проекція).
+
+📝 Практичне завдання №57: "Прив'язка власників до апартаментів"
+Для цього завдання нам знадобиться другий список.
+
+1. Створи новий клас Owner
+2. Створи список власників
+Додай 3-4 власники. Зроби так, щоб:
+Один власник мав номер квартири, якої немає у твоєму списку buildings.
+Одна твоя квартира (наприклад, Novara #1) не мала власника у новому списку.
+
+3. Напиши Join-запит
+Твоя мета — вивести список рядків: "Власник [Ім'я] володіє квартирою №[Номер] у місті [Місто]".
+
+Що ти маєш помітити:
+Квартира без власника та власник без існуючої квартири не з'являться в консолі. Це і є головна особливість Inner Join.
+
+✅ Рішення:
+//У файлі Program.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+List<Owner> owners = new List<Owner>
+{
+    new Owner { Name = "Maria", ApartmentNumber = 105},
+    new Owner { Name = "Marco", ApartmentNumber = 76},
+    new Owner { Name = "Luka", ApartmentNumber = 114},
+    new Owner { Name = "Giulia", ApartmentNumber = 37},
+};
+
+List<Apartment> buildings = new List<Apartment>
+{
+    new Apartment
+    {
+        Number = 12,
+        City = "Novara",
+        EnergyConsumption = 87.3,
+        isOccupied = false,
+        MonthlyEnergyBill = {1, 2, 3}
+    },
+    new Apartment
+    {
+        Number = 34,
+        City = "Biela",
+        EnergyConsumption = 110.1,
+        isOccupied = false,
+        MonthlyEnergyBill = {4, 5, 6}
+    },
+    new Apartment
+    {
+        Number = 114,
+        City = "Vercelli",
+        EnergyConsumption = 90.0,
+        isOccupied = true,
+        MonthlyEnergyBill = {7, 8, 9}
+    },
+        new Apartment
+    {
+        Number = 76,
+        City = "Alessandria",
+        EnergyConsumption = 56.2,
+        isOccupied = false,
+        MonthlyEnergyBill = {10, 11, 12}
+    },
+    new Apartment
+    {
+        Number = 80,
+        City = "Genova",
+        EnergyConsumption = 123.4,
+        isOccupied = false,
+        MonthlyEnergyBill = {13, 14, 15}
+    },
+    new Apartment
+    {
+        Number = 105,
+        City = "Novi Ligure",
+        EnergyConsumption = 156.7,
+        isOccupied = true,
+        MonthlyEnergyBill = {16, 17, 18}
+    },
+};
+
+var apartmentResidents = owners.Join(
+    buildings,                          // 1. Друга колекція
+    own => own.ApartmentNumber,         // 2. Ключ власника
+    build => build.Number,              // 3. Ключ квартири
+    (own, build) => new                 // 4. Що створюємо
+    {
+        OwnerName = own.Name,
+        ApartmentNumber = build.Number,
+        City = build.City
+    }
+);
+
+foreach(var resident in apartmentResidents)
+{
+    Console.WriteLine($"Власник {resident.OwnerName} володіє квартирою № {resident.ApartmentNumber} у місті {resident.City}");
+    // Власник Maria володіє квартирою № 105 у місті Novi Ligure
+    // Власник Marco володіє квартирою № 76 у місті Alessandria
+    // Власник Luka володіє квартирою № 114 у місті Vercelli
+}
+
+public class Apartment
+{
+    public int Number { get; set; }
+    public string? City { get; set; }
+    public double EnergyConsumption { get; set; }
+    public bool isOccupied { get; set; }
+    public List<double> MonthlyEnergyBill { get; set; } = new List<double>();
+}
+
+public class Owner
+{
+    public string? Name { get; set; }
+    public int ApartmentNumber { get; set; } // Ключ для зв'язку
+}
+
+--- 🟢 БАГАТОРІВНЕВИЙ JOIN 🟢 ---
+📝 Практичне завдання №2: «Автосалон: Повний родовід авто»
+Тобі потрібно створити ланцюжок, де інформація з першого списку дотягнеться до третього через "посередника".
+Дані (класи):
+Manufacturer: Id, BrandName, Country.
+Model: Id, ManufacturerId, ModelName.
+Inventory: ModelId, StockCount.
+Алгоритм дій:
+Списки: Створи по 2-3 об'єкти для кожного класу. Зв'яжи їх логічно:
+Inventory -> Model (через ModelId).
+Model -> Manufacturer (через ManufacturerId).
+LINQ-запит:
+Почни з inventory.
+Зроби перший Join з models.
+Зроби другий Join з manufacturers.
+Результат: Створи анонімний об'єкт, який витягне:
+Назву бренду (з виробника).
+Країну (з виробника).
+Назву моделі (з моделі).
+Кількість (зі складу).
+Вивід: Виведи в консоль фразу: "Автомобіль [Модель] ([Бренд], [Країна]) — в наявності: [Кількість] шт."
+💡 Технічна порада (щоб не заплутатися):
+Коли ти робиш другий Join, пам'ятай, що "ліва сторона" (результат першого з'єднання) вже містить у собі два об'єкти. 
+Тобі доведеться правильно витягнути з них ManufacturerId, щоб порівняти його з Manufacturer.Id.
+
+✅ Рішення:
+//У файлі Program.cs
+using System;
+using System.Collections.Generic;
+using System.Linq
+
+List<Manufacturer> manufacturers = new List<Manufacturer>
+{
+    new Manufacturer{ Id = 1, BrandName = "PepsiCo", Country = "USA" },
+    new Manufacturer{ Id = 2, BrandName = "Procter & Gamble", Country = "USA" },
+    new Manufacturer{ Id = 3, BrandName = "Geely Automobile", Country = "China" },
+};
+
+List<Model> models = new List<Model>
+{
+    new Model{ Id = 543, ManufacturerId = 1, ModelName = "Pepsi" },
+    new Model{ Id = 812, ManufacturerId = 2, ModelName = "Tide" },
+    new Model{ Id = 906, ManufacturerId = 3, ModelName = "Geely" },
+};
+
+List<Inventory> inventories = new List<Inventory>
+{
+    new Inventory{ ModelId = 543, StockCount = 12000 },
+    new Inventory{ ModelId = 812, StockCount = 23700 },
+    new Inventory{ ModelId = 906, StockCount = 4500 },
+};
+
+var firstJoin = inventories.Join(
+                                models,
+                                inv => inv.ModelId,
+                                mod => mod.Id,
+                                (inv, mod) => new
+                                {
+                                    AmountOfItems = inv.StockCount,
+                                    NameOffTheModel = mod.ModelName,
+                                    IdForManufacture = mod.ManufacturerId
+                                }
+                            );
+
+var secondJoin = firstJoin.Join(
+                                manufacturers,
+                                fir => fir.IdForManufacture,
+                                man => man.Id,
+                                (fir, man) => new
+                                {
+                                    NameOfTheBrand = man.BrandName,
+                                    ManufacturerCountry = man.Country,
+                                    StockCount = fir.AmountOfItems,
+                                    ModelName = fir.NameOffTheModel
+                                }
+                            );
+
+foreach(var manufacture in secondJoin)
+{
+    Console.WriteLine($"Товар {manufacture.ModelName} ({manufacture.NameOfTheBrand}, {manufacture.ManufacturerCountry}) - в наявності {manufacture.StockCount} шт.");
+}
+
+class Manufacturer
+{
+    public int Id { get; set; }
+    public string? BrandName { get; set; }
+    public string? Country { get; set; }
+}
+
+class Model
+{
+    public int Id { get; set; }
+    public int ManufacturerId { get; set; }
+    public string? ModelName { get; set; }
+}
+
+class Inventory
+{
+    public int ModelId { get; set; }
+    public int StockCount { get; set; }
+}
