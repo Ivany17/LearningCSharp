@@ -238,3 +238,4 @@ var myBuildings = new[]
 var resultSelector = myBuildings.Aggregate(0.0, (acc, n) => acc + n.EnergyConsumption, finalSum => $"Final Energy Report: {finalSum} kWh");
 
 Console.WriteLine(resultSelector); // Final Energy Report: 101 kWh 
+ 
