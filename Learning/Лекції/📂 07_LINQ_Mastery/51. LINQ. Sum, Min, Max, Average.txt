@@ -1,0 +1,86 @@
+Тема №51. LINQ: Агрегатні методи (Sum, Min, Max, Average)
+Тепер, коли ми вміємо фільтрувати списки, давай навчимося отримувати з них підсумкові цифри. Це найкорисніша частина для будь-якої аналітики.
+
+Теорія:
+Агрегатні методи дозволяють "стиснути" всю колекцію до одного числа.
+
+.Sum() — рахує загальну суму (наприклад, скільки всього світла спалив весь будинок).
+.Average() — рахує середнє значення (середня енергоефективність по місту).
+.Max() / .Min() — знаходить найбільше та найменше значення.
+.Count() — рахує кількість елементів (наприклад, скільки квартир зараз заселено).
+
+📝 Завдання №51: "Енергетичний звіт"
+Використовуючи свій існуючий список buildings, виведи в консоль такі дані:
+Загальне споживання всіх квартир у списку (.Sum).
+Середнє споживання по всьому будинку (.Average).
+Кількість заселених квартир (використай .Where(a => a.isOccupied == true).Count()).
+Маленька підказка: Ці методи повертають одне число, тому їх не треба перебирати через foreach. 
+Можна просто вивести результат у Console.WriteLine.
+
+✅ Рішення:
+//У файлі Program.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+List<Apartment> buildings = new List<Apartment>
+{
+    new Apartment
+    {
+        Number = 12,
+        City = "Novara",
+        EnergyConsumption = 87.3,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 34,
+        City = "Biela",
+        EnergyConsumption = 110.1,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 114,
+        City = "Vercelli",
+        EnergyConsumption = 90.0,
+        isOccupied = true
+    },
+        new Apartment
+    {
+        Number = 76,
+        City = "Alessandria",
+        EnergyConsumption = 56.2,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 80,
+        City = "Genova",
+        EnergyConsumption = 123.4,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 114,
+        City = "Novi Ligure",
+        EnergyConsumption = 156.7,
+        isOccupied = true
+    },
+};
+
+var totalConsumption = buildings.Sum(b  => b.EnergyConsumption);
+var averageConsumption = buildings.Average(b  => b.EnergyConsumption);
+var amountOfOccupiedApartments = buildings.Where(b => b.isOccupied).Count();
+
+Console.WriteLine($"Загальне споживання енергії всіх квартир {totalConsumption} кВт*год"); // Загальне споживання енергії всіх квартир 623,7 кВт*год
+Console.WriteLine($"Середнє споживання енергії всіх квартир {averageConsumption} кВт*год"); // Середнє споживання енергії всіх квартир 103,95 кВт*год
+Console.WriteLine($"В {amountOfOccupiedApartments}-х квартирах зараз живуть люди"); // В 2-х квартирах зараз живуть люди
+
+public class Apartment
+{
+    public int Number { get; set; }
+    public string? City { get; set; }
+    public double EnergyConsumption { get; set; }
+    public bool isOccupied { get; set; }
+}
