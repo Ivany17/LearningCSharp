@@ -1,0 +1,112 @@
+Тема №52. LINQ: Перетворення даних (Select)
+Метод .Select() дозволяє "трансформувати" об'єкти. Наприклад, якщо у тебе є список цілих об'єктів Apartment, 
+але для звіту тобі потрібні лише їхні номери або тільки назви міст, .Select() витягне саме ці поля і створить новий список.
+Якщо Where — це сито (фільтр), то Select — це дзеркало або конвеєр. Він бере кожен елемент і «перетворює» його на щось інше.
+
+📝 Завдання №52: "Список адрес"
+Уяви, що тобі потрібно роздрукувати список міст, де знаходяться твої об'єкти, щоб передати його кур'єру.
+Використай свій список buildings.
+Застосуй .Select(a => a.City).
+Оскільки у списку можуть бути однакові міста, додай метод .Distinct() (він видаляє дублікати, залишаючи тільки унікальні назви).
+Виведи результат у консоль через foreach.
+
+Приклад коду для конспекту:
+var cities = buildings.Select(a => a.City).Distinct().ToList();
+
+✅ Рішення:
+//У файлі Program.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+List<Apartment> buildings = new List<Apartment>
+{
+    new Apartment
+    {
+        Number = 12,
+        City = "Novara",
+        EnergyConsumption = 87.3,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 34,
+        City = "Biela",
+        EnergyConsumption = 110.1,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 114,
+        City = "Vercelli",
+        EnergyConsumption = 90.0,
+        isOccupied = true
+    },
+        new Apartment
+    {
+        Number = 76,
+        City = "Alessandria",
+        EnergyConsumption = 56.2,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 80,
+        City = "Genova",
+        EnergyConsumption = 123.4,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 114,
+        City = "Novi Ligure",
+        EnergyConsumption = 156.7,
+        isOccupied = true
+    },
+};
+
+var totalConsumption = buildings.Sum(b  => b.EnergyConsumption);
+var averageConsumption = buildings.Average(b  => b.EnergyConsumption);
+var amountOfOccupiedApartments = buildings.Where(b => b.isOccupied).Count();
+
+Console.WriteLine($"Загальне споживання енергії всіх квартир {totalConsumption} кВт*год"); // Загальне споживання енергії всіх квартир 623,7 кВт*год
+Console.WriteLine($"Середнє споживання енергії всіх квартир {averageConsumption} кВт*год"); // Середнє споживання енергії всіх квартир 103,95 кВт*год
+Console.WriteLine($"В {amountOfOccupiedApartments}-х квартирах зараз живуть люди"); // В 2-х квартирах зараз живуть люди
+
+public class Apartment
+{
+    public int Number { get; set; }
+    public string? City { get; set; }
+    public double EnergyConsumption { get; set; }
+    public bool isOccupied { get; set; }
+}
+
+🚀 Завдання №52.2: «Система керування запасами»
+Уяви, що ти працюєш над модулем для складу. У тебе є список ваги товарів у грамах, але для логістики потрібні зовсім інші дані.
+List<int> inventoryInGrams = new List<int> { 500, 1200, 350, 4000, 2100, 900, 5000, 150 };
+Твоє завдання:
+Переведи всю вагу з грамів у кілограми (пам'ятай, що в 1 кг — 1000 грамів, і результат має бути дробовим числом double, 
+щоб не втратити точність).
+Складська техніка може підняти тільки важкі вантажі, тому відфільтруй отриманий список так, щоб залишилися тільки ті позиції,
+вага яких 2 кілограми або більше.
+Знайди середню вагу саме цих важких вантажів.
+Виведи в консоль:
+Список важких вантажів у кг (через foreach).
+Середню вагу (окремим рядком).
+
+✅ Рішення:
+//У файлі Program.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+List<int> inventoryInGrams = new List<int> { 500, 1200, 350, 4000, 2100, 900, 5000, 150 };
+var inventoryInKilograms = inventoryInGrams.Select(i => i / 1000.0);
+var heavyPackages = inventoryInKilograms.Where(i => i > 2);
+var averageHeavy = heavyPackages.Average();
+foreach(var heavy in heavyPackages)
+{
+    Console.Write(heavy + " кг, ");
+}
+Console.WriteLine();
+Console.WriteLine($"Середня вага важких товарів: {Math.Round(averageHeavy)} кг");
