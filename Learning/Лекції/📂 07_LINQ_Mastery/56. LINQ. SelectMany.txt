@@ -1,0 +1,246 @@
+Тема №56. LINQ: "Розгладжування" списків (SelectMany)
+Теорія:
+Бувають ситуації, коли у кожного об'єкта в списку є свій власний список (наприклад, у кожної квартири є 
+список мешканців або список показань лічильника). Якщо ти просто використаєш .Select(), ти отримаєш "список списків", з яким незручно працювати.
+
+Метод .SelectMany() "розгладжує" (flatten) ці вкладені колекції в один загальний довгий список.
+
+📝 Завдання №56: "Єдиний реєстр показників"
+Давай трохи ускладнимо твій клас Apartment, щоб спробувати цей метод у дії.
+Онови клас: Додай властивість public List<double> MonthlyEnergyBill { get; set; } = new List<double>();.
+Наповни дані: Додай кожній квартирі у списку buildings по 2-3 цифри (наприклад, показники за січень, лютий, березень).
+Застосуй SelectMany: Створи запит, який збере всі показники з усіх квартир в один загальний список allBills.
+Порахуй результат: Використай .Average(), щоб дізнатися середній показник по всій мережі за всі місяці.
+
+✅ Рішення:
+//У файлі Program.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+List<Apartment> buildings = new List<Apartment>
+{
+    new Apartment
+    {
+        Number = 12,
+        City = "Novara",
+        EnergyConsumption = 87.3,
+        isOccupied = false,
+        MonthlyEnergyBill = {1, 2, 3},
+        Rooms = new List<Room>
+        {
+            new Room 
+            { 
+                RoomName = "Кухня", 
+                Devices = new List<Device> 
+                { 
+                    new Device { DeviceName = "Холодильник" } 
+                } 
+            }
+        }
+    },
+    new Apartment
+    {
+        Number = 34,
+        City = "Biela",
+        EnergyConsumption = 110.1,
+        isOccupied = false,
+        MonthlyEnergyBill = {4, 5, 6},
+        Rooms = new List<Room>
+        {
+            new Room 
+            { 
+                RoomName = "Ванна кімната", 
+                Devices = new List<Device> 
+                {
+                    new Device { DeviceName = "Фен" },
+                    new Device { DeviceName = "Пральна машина" }, 
+                } 
+            }
+        }
+    },
+    new Apartment
+    {
+        Number = 114,
+        City = "Vercelli",
+        EnergyConsumption = 90.0,
+        isOccupied = true,
+        MonthlyEnergyBill = {7, 8, 9},
+        Rooms = new List<Room>
+        {
+            new Room 
+            { 
+                RoomName = "Cпальня", 
+                Devices = new List<Device> 
+                {
+                    new Device { DeviceName = "Лампа" },
+                    new Device { DeviceName = "Електропростирадло" }, 
+                } 
+            }
+        }
+    },
+        new Apartment
+    {
+        Number = 76,
+        City = "Alessandria",
+        EnergyConsumption = 56.2,
+        isOccupied = false,
+        MonthlyEnergyBill = {10, 11, 12},
+        Rooms = new List<Room>
+        {
+            new Room 
+            { 
+                RoomName = "Ванна кімната", 
+                Devices = new List<Device> 
+                {
+                    new Device { DeviceName = "Випрямляч волосся" },
+                    new Device { DeviceName = "Сушарка" }, 
+                } 
+            }
+        }
+    },
+    new Apartment
+    {
+        Number = 80,
+        City = "Genova",
+        EnergyConsumption = 123.4,
+        isOccupied = false,
+        MonthlyEnergyBill = {13, 14, 15},
+        Rooms = new List<Room>
+        {
+            new Room 
+            { 
+                RoomName = "Кухня", 
+                Devices = new List<Device> 
+                { 
+                    new Device { DeviceName = "Плита" } 
+                } 
+            }
+        }
+    },
+    new Apartment
+    {
+        Number = 105,
+        City = "Novi Ligure",
+        EnergyConsumption = 156.7,
+        isOccupied = true,
+        MonthlyEnergyBill = {16, 17, 18},
+        Rooms = new List<Room>
+        {
+            new Room 
+            { 
+                RoomName = "Вітальня", 
+                Devices = new List<Device> 
+                { 
+                    new Device { DeviceName = "Телевізор" },
+                    new Device { DeviceName = "Кондиціонер" }
+                } 
+            }
+        }
+    },
+};
+
+// // 🟣1️⃣. Просто плоский список квартир (List<string>)
+// // Це найпростіша форма SelectMany. Вона просто «витрушує» всі елементи з внутрішніх списків в один загальний рядок.
+// var allBills = buildings.SelectMany(b => b.MonthlyEnergyBill);
+
+// Console.WriteLine($"Загальна кількість зафіксованих платежів: {allBills.Count()}"); // Загальна кількість зафіксованих платежів: 18
+// Console.WriteLine($"Середній платіж по всій мережі: {allBills.Average()}"); // Середній платіж по всій мережі: 9,5
+
+// // 🔵2️⃣. SelectMany: Збереження батьківського контексту
+// // 📝 Завдання 46.2: "Персоналізований реєстр платежів"
+// // Твоя мета — витягнути номери квартир разом із кожним окремим платежем, щоб було зрозуміло, хто саме скільки винен.
+
+// // Твоє завдання:
+// // Використай список buildings.
+// // Напиши запит через SelectMany, який приймає два аргументи:
+// // Перший: шлях до списку (b => b.MonthlyEnergyBill).
+// // Другий: лямбда-вираз, який створює новий анонімний об'єкт new { ... }.
+// // В анонімний об'єкт запиши:
+// // FlatNumber (з об'єкта квартири).
+// // BillAmount (конкретне значення платежу).
+// // Виведи це в консоль через foreach.
+
+// var allBills = buildings.SelectMany(b => b.MonthlyEnergyBill, (buildings, bill) => new
+// {
+//     FlatNumber = buildings.Number,
+//     Bill = bill
+// });
+
+// foreach(var bills in allBills)
+// {
+//     Console.WriteLine($"Квартира під номером {bills.FlatNumber} - Платіж: {bills.Bill}");
+//     // Квартира під номером 12 - Платіж: 1
+//     // Квартира під номером 12 - Платіж: 2
+//     // Квартира під номером 12 - Платіж: 3
+//     // ...
+//     // Квартира під номером 105 - Платіж: 16
+//     // Квартира під номером 105 - Платіж: 17
+//     // Квартира під номером 105 - Платіж: 18
+// }
+
+// // 🟢3️⃣. SelectMany: Глибоке розгортання (Deep SelectMany)
+// 📝 Завдання №46.3: "Глибока перевірка обладнання"
+// Давай застосуємо цю "трирівневу" логіку до твого проекту.
+
+// Умова:
+// У кожній квартирі (Apartment) є список кімнат.
+// У кожній кімнаті є список приладів (електроніки).
+// Твоє завдання:
+// Додай public class Room, де є string Name і List<Device> Devices і додай public class Device, де є string Name
+// Додай у клас Apartment:
+// public List<Room> Rooms { get; set; } = new List<Room>();
+// Обов'язково створи в Main нові ккімнати і наповни їх електронікою
+// Використай два SelectMany підряд, щоб дістатися до приладів, зберігаючи при цьому City та Number квартири.
+
+var electronicInApartment = buildings
+                        .SelectMany(b => b.Rooms, (buildings, rooms) => new {buildings.City, buildings.Number, rooms})
+                        .SelectMany(level1 => level1.rooms.Devices, (level1, device) => new
+                                                                {
+                                                                    level1.City,
+                                                                    level1.Number,
+                                                                    NameOfTheRoom = level1.rooms.RoomName,
+                                                                    NameOfTheDevice = device.DeviceName
+                                                                })
+                                                                // 1. Групуємо все, що ми розгорнули, назад за спільними ознаками
+                                                                .GroupBy(x => new { x.City, x.Number, x.NameOfTheRoom })
+                                                                // 2. Створюємо фінальний вигляд, де прилади йдуть через кому
+                                                                .Select(g => new 
+                                                                {
+                                                                    g.Key.City,
+                                                                    g.Key.Number,
+                                                                    g.Key.NameOfTheRoom,
+                                                                    AllDevices = string.Join(", ", g.Select(d => d.NameOfTheDevice))
+                                                                });
+
+foreach(var devices in electronicInApartment)
+{
+    Console.WriteLine($"Місто: {devices.City} | Кв. №{devices.Number} | Кімната: {devices.NameOfTheRoom} | Прилади: {devices.AllDevices}");
+    // Місто: Novara | Кв. №12 | Кімната: Кухня | Прилади: Холодильник
+    // Місто: Biela | Кв. №34 | Кімната: Ванна кімната | Прилади: Фен, Пральна машина
+    // Місто: Vercelli | Кв. №114 | Кімната: Cпальня | Прилади: Лампа, Електропростирадло
+    // Місто: Alessandria | Кв. №76 | Кімната: Ванна кімната | Прилади: Випрямляч волосся, Сушарка
+    // Місто: Genova | Кв. №80 | Кімната: Кухня | Прилади: Плита
+    // Місто: Novi Ligure | Кв. №105 | Кімната: Вітальня | Прилади: Телевізор, Кондиціонер
+}
+
+public class Apartment
+{
+    public int Number { get; set; }
+    public string? City { get; set; }
+    public double EnergyConsumption { get; set; }
+    public bool isOccupied { get; set; }
+    public List<double> MonthlyEnergyBill { get; set; } = new List<double>();
+    public List<Room> Rooms { get; set; } = new List<Room>();
+}
+
+public class Room 
+{ 
+    public string? RoomName { get; set; } 
+    public List<Device> Devices { get; set; } = new List<Device>(); 
+}
+
+public class Device
+{ 
+    public string? DeviceName { get; set; } 
+}
