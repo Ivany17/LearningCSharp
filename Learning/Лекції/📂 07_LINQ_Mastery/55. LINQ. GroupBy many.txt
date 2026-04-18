@@ -1,0 +1,136 @@
+Тема №55. LINQ: Групування за кількома умовами
+Теорія:
+Іноді групування за одним полем (наприклад, тільки за містом) недостатньо. Наприклад, ти хочеш знати не просто, 
+які квартири є в Novara, а розділити їх на "заселені" та "вільні" всередині цього міста.
+Для цього в GroupBy замість одного поля ми передаємо анонімний тип new { ... }. 
+Ключем групи (.Key) тепер буде не одна сторінка, а ціла комбінація значень.
+
+📝 Завдання №55: "Глибока аналітика об'єктів"
+Давай розділимо твої дані за двома ознаками: Місто + Статус заселеності (isOccupied).
+
+Створи запит complexGroup.
+Використай .GroupBy(a => new { a.City, a.isOccupied }).
+
+У циклі foreach виведи:
+Місто та статус (наприклад: "Novara (Заселено: True)").
+Список номерів квартир, що підпадають під цю комбінацію.
+
+✅ Рішення:
+//У файлі Program.cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+List<Apartment> buildings = new List<Apartment>
+{
+    new Apartment
+    {
+        Number = 12,
+        City = "Novara",
+        EnergyConsumption = 87.3,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 34,
+        City = "Biela",
+        EnergyConsumption = 110.1,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 114,
+        City = "Vercelli",
+        EnergyConsumption = 90.0,
+        isOccupied = true
+    },
+        new Apartment
+    {
+        Number = 76,
+        City = "Alessandria",
+        EnergyConsumption = 56.2,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 80,
+        City = "Genova",
+        EnergyConsumption = 123.4,
+        isOccupied = false
+    },
+    new Apartment
+    {
+        Number = 114,
+        City = "Novi Ligure",
+        EnergyConsumption = 156.7,
+        isOccupied = true
+    },
+};
+
+var complexGroup = buildings.GroupBy(a => new { a.City, a.isOccupied });
+
+foreach (var group in complexGroup)
+{
+    // Тепер у group.Key є і City, і isOccupied
+    Console.WriteLine($"Місто: {group.Key.City} | Заселено: {group.Key.isOccupied}");
+    
+    foreach (var apart in group)
+    {
+        Console.WriteLine($"  - Квартира № {apart.Number}");
+        // Місто: Novara | Заселено: False
+        // - Квартира № 12
+        // Місто: Biela | Заселено: False
+        // - Квартира № 34
+        // Місто: Vercelli | Заселено: True
+        // - Квартира № 114
+        // Місто: Alessandria | Заселено: False
+        // - Квартира № 76
+        // Місто: Genova | Заселено: False
+        // - Квартира № 80
+        // Місто: Novi Ligure | Заселено: True
+        // - Квартира № 114
+    }
+}
+
+public class Apartment
+{
+    public int Number { get; set; }
+    public string? City { get; set; }
+    public double EnergyConsumption { get; set; }
+    public bool isOccupied { get; set; }
+}
+
+
+
+Урок №45.1. LINQ: Проекція складних груп (GroupBy + Select)
+Теорія:
+Коли ми групуємо за кількома полями (через new { ... }), ми можемо одразу в Select сформувати готовий рядок або об'єкт. 
+Це дозволяє позбутися вкладених циклів і виводити всю інформацію про групу одним рядком.
+
+📝 Завдання №45.1: "Компактний аналітичний звіт"
+Твоя мета — отримати список рядків, де вся інформація про групу (місто, статус, номери квартир) зібрана разом.
+
+Твоє завдання:
+Додай до свого запиту з анонімним ключем метод .Select(...).
+Створи в Select новий анонімний об'єкт.
+Для номерів квартир використай вже знайомий тобі string.Join.
+
+Ось як це має виглядати:
+var compactReport = buildings
+    .GroupBy(a => new { a.City, a.isOccupied })
+    .Select(g => new 
+    {
+        Info = $"{g.Key.City} (Заселено: {g.Key.isOccupied})",
+        Numbers = string.Join(", ", g.Select(a => a.Number))
+    });
+
+foreach (var item in compactReport)
+{
+    Console.WriteLine($"{item.Info} -> Номери: {item.Numbers}");
+    // Novara (Заселено: False) -> Номери: 12
+    // Biela (Заселено: False) -> Номери: 34
+    // Vercelli (Заселено: True) -> Номери: 114
+    // Alessandria (Заселено: False) -> Номери: 76
+    // Genova (Заселено: False) -> Номери: 80
+    // Novi Ligure (Заселено: True) -> Номери: 114
+}
