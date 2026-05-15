@@ -1,0 +1,258 @@
+Тема №62: Паралельне виконання та Task.WhenAll 🚀
+До цього моменту ми використовували await одразу при виклику методу. 
+Це змушувало програму чекати кожну дію по черзі. Але справжня перевага асинхронності в тому, що ми можемо запустити кілька справ одночасно!
+
+1. Запуск без негайного очікування 🏃‍♂️
+Коли ти викликаєш асинхронний метод без слова await, він повертає тобі об'єкт Task (або Task<T>), який вже почав виконуватися "у фоні".
+
+Task teaTask = MakeTeaAsync(); — чайник почав грітися, але програма вже перейшла до наступного рядка.
+
+2. Магія Task.WhenAll 🪄
+Це спеціальний метод-контролер. Він приймає кілька завдань і створює одне велике завдання, яке завершиться лише тоді, 
+коли всі передані йому справи будуть готові.
+await Task.WhenAll(teaTask, toastTask); — ми сідаємо і чекаємо, поки і чай завариться, і тости підсмажаться.
+
+3. Чому це вигідно? ⏱️
+Уяви:
+Чай готується 3 секунди.
+Тости готуються 3 секунди.
+По черзі (await + await): Ти витратиш 6 секунд.
+Паралельно (WhenAll): Ти витратиш всього 3 секунди, бо вони готуються одночасно!
+
+4. Як забрати результат? 📥
+Після того, як Task.WhenAll завершився, результати вже лежать всередині самих об'єктів задач. Їх можна дістати через властивість .Result:
+string tea = teaTask.Result;
+string toast = toastTask.Result;
+
+⚠️⚠️ Але замість Result краще використовувати await, адже
+🔴 .Result (Блокування): Потік (Thread) зупиняється і "тупо" чекає. Він не може виконувати іншу роботу. 
+Це як стояти в черзі в магазині і нічого не робити, поки продавець шукає товар.
+🟢 await (Неблокування): Потік каже: "Я пішов робити інші справи, а коли результат буде готовий — покличте мене". 
+Це як залишити номер телефону в магазині: ти гуляєш, а тобі телефонують, коли товар привезли.
+string tea = await teaTask;
+string toast = await toastTask;
+
+📝 Завдання №62: "Ранкова мультизадачність" 🍳☕
+Створи два методи:
+async Task<string> FryEggsAsync(int count) — затримка 3 секунди, повертає "Яєчня з {count} яєць готова!".
+async Task<string> ToastBreadAsync(int slices) — затримка 3 секунди, повертає "{slices} шматочки хліба підсмажено!".
+У основному коді:
+Виведи повідомлення: "Починаю готувати сніданок...".
+Запусти обидва методи без await і збережи їх у змінні eggsTask та toastTask.
+Одразу після запуску (не чекаючи!) виведи: "Поки сніданок готується, я перевіряю пошту...".
+Тепер використай await Task.WhenAll(eggsTask, toastTask);.
+Після очікування виведи результати, використовуючи .Result, або await обох задач.
+Зверни увагу на час: Обидва повідомлення про готовність мають з'явитися майже одночасно через 3 секунди після старту.
+
+✅ Рішення:
+Console.WriteLine("Починаю готувати сніданок...");
+Task<string> eggsTask = FryEggsAsync(3);
+Task<string> toastTask = ToastBreadAsync(2);
+Console.WriteLine("Поки сніданок готується, я перевіряю пошту...");
+await Task.WhenAll(eggsTask, toastTask); // await - обов'язково
+string readyEggs = eggsTask.Result;
+// string readyEggs = await eggsTask; // краще використати await
+string readyToasts = toastTask.Result;
+// string readyToasts = await toastTask; // краще використати await
+Console.WriteLine(readyEggs);
+Console.WriteLine(readyToasts);
+
+async Task<string> FryEggsAsync(int count)
+{
+    await Task.Delay(3000);
+    return $"Яєчня з {count} яєць готова!";
+}
+async Task<string> ToastBreadAsync(int slices)
+{
+    await Task.Delay(3000);
+    return $"{slices} шматочки хліба підсмажено!";
+}
+
+📝 Завдання №62.2: "Асинхронний збір даних" 📊
+Уяви, що тобі потрібно зібрати інформацію з трьох різних серверів одночасно.
+Створи три методи:
+GetServerStatusAsync (повертає Task<string>, імітує затримку 2 секунди, результат: "Сервер працює").
+GetOnlineUsersAsync (повертає Task<int>, затримка 4 секунди, результат: 150).
+GetVersionAsync (повертає Task<double>, затримка 1 секунда, результат: 1.2).
+У основному коді:
+Запусти всі три методи паралельно (збережи їх у змінні типу Task<...>).
+Поки вони "вантажаться", виведи в консоль: "Отримую дані з серверів...".
+Використай await Task.WhenAll, щоб дочекатися завершення всіх трьох задач.
+Виведи фінальний звіт, діставши значення через .Result, або await
+
+✅ Рішення:
+Task<string> status = GetServerStatusAsync();
+Task<int> online = GetOnlineUsersAsync();
+Task<double> version = GetVersionAsync();
+Console.WriteLine("Отримую дані з серверів...");
+
+await Task.WhenAll(status, online, version); // await - обов'язково
+
+// Дістаємо результати асинхронно і безпечно
+string finalStatus = await status;
+int finalOnline = await online;
+double finalVersion = await version;
+
+// Тепер спокійно виводимо
+Console.WriteLine(finalStatus);
+Console.WriteLine($"Кількість онлайн гравців: {finalOnline}");
+Console.WriteLine($"Версія: {finalVersion}");
+
+Console.WriteLine("Всі дані отримано успішно!");
+
+async Task<string> GetServerStatusAsync()
+{
+    await Task.Delay(2000);
+    return $"Сервер працює";
+}
+
+async Task<int> GetOnlineUsersAsync()
+{
+    await Task.Delay(4000);
+    return 150;
+}
+
+async Task<double> GetVersionAsync()
+{
+    await Task.Delay(1000);
+    return 1.2;
+}
+
+📝 Завдання №62.3: "Асинхронний менеджер завантажень" 📥
+Уяви, що ти пишеш логіку для браузера, який одночасно завантажує файл, перевіряє його на віруси та оновлює прогрес-бар.
+Створи три методи:
+DownloadFileAsync(string fileName): повертає Task<int>. Затримка 3000 мс. Повертає "розмір" файлу (наприклад, 500).
+ScanForVirusesAsync(): повертає Task<bool>. Затримка 2000 мс. Повертає true (що вірусів немає).
+GetDownloadSourceAsync(): повертає Task<string>. Затримка 1000 мс. Повертає адресу: "https://server1.com".
+У основному коді:
+Запусти всі три процеси одночасно.
+Поки вони тривають, виведи в консоль: "Завантаження розпочато...".
+Дочекайся всіх через await Task.WhenAll.
+Виведи фінальний звіт одним блоком, використовуючи результати.
+
+✅ Рішення:
+string fileName = "Learning";
+Task<int> file = DownloadFileAsync(fileName);
+Task<bool> withoutViruses = ScanForVirusesAsync();
+Task<string> source = GetDownloadSourceAsync();
+
+Console.WriteLine("Завантаження розпочато...");
+
+// Очікуємо завершення всіх завдань
+await Task.WhenAll(fileTask, virusTask, sourceTask);
+
+// Отримуємо результати БЕЗ блокування потоку через await
+int fileSize = await fileTask;
+bool isSafe = await virusTask;
+string downloadSource = await sourceTask;
+
+// Виводимо фінальний звіт
+Console.WriteLine($"Джерело: {downloadSource}");
+Console.WriteLine($"Файл {fileName} ({fileSize} МБ) завантажено.");
+Console.WriteLine($"Перевірка на віруси пройдена: {isSafe}");
+
+async Task<int> DownloadFileAsync(string fileName)
+{
+    await Task.Delay(3000);
+    return 500;
+}
+
+async Task<bool> ScanForVirusesAsync()
+{
+    await Task.Delay(2000);
+    return true;
+}
+
+async Task<string> GetDownloadSourceAsync()
+{
+    await Task.Delay(1000);
+    return "https://server1.com";
+}
+
+📝 Завдання №62.4: Асинхронний агрегатор новин
+Тобі потрібно імітувати запит до трьох різних новинних ресурсів. Кожен ресурс повертає кількість знайдених новин за певним словом.
+Твоя задача:
+Створи один метод Task<int> GetNewsCountAsync(string sourceName, int delay).
+Він має виводити: "Запит до {sourceName}...".
+Чекати delay мілісекунд.
+Повертати випадкове число від 1 до 100 (використай клас Random).
+У основному коді запусти три таски одночасно:
+googleTask (затримка 1500 мс).
+facebookTask (затримка 1000 мс).
+twitterTask (затримка 2000 мс).
+Дочекайся завершення всіх через Task.WhenAll.
+Після завершення:
+Отримай результати кожного таска.
+Виведи кількість новин з кожного джерела.
+Головна фішка: Порахуй і виведи загальну суму всіх знайдених новин.
+
+Random generator = new Random();
+
+async Task<int> GetNewsCountAsync(string sourceName, int delay)
+{
+    Console.WriteLine($"Запит до {sourceName}...");
+    await Task.Delay(delay);
+    int amount = generator.Next(1, 101);
+    return amount;
+}
+
+Task<int> googleTask = GetNewsCountAsync("Google", 1500);
+Task<int> facebookTask = GetNewsCountAsync("Facebook", 1000);
+Task<int> twitterTask = GetNewsCountAsync("Twitter", 2000);
+
+await Task.WhenAll(googleTask, facebookTask, twitterTask);
+
+int readyGoogle = await googleTask;
+int readyFacebook = await facebookTask;
+int readyTwitter = await twitterTask;
+
+int totalAmountNews = readyGoogle + readyFacebook + readyTwitter;
+
+Console.WriteLine(readyGoogle);
+Console.WriteLine(readyFacebook);
+Console.WriteLine(readyTwitter);
+Console.WriteLine($"Усього знайдено {totalAmountNews} новин");
+
+📝 Завдання №62.5 (Випускне): "Кінотеатр" 🎬
+Це завдання перевірить твое вміння комбінувати послідовне очікування (await) та паралельне (WhenAll).
+Сценарій: Тобі потрібно отримати дані про фільм. Але рейтинг неможливо дізнатися, не знаючи назви!
+Методи (створи їх):
+GetMovieTitleAsync(): повертає Task<string>, затримка 2000 мс, повертає "Inception".
+GetMovieRatingAsync(string title): повертає Task<double>, затримка 1000 мс, повертає 8.8.
+GetPosterUrlAsync(): повертає Task<string>, затримка 2500 мс, повертає "https://posters.com/inception.jpg".
+Алгоритм у Program.cs:
+Крок 1: Спочатку виклич GetMovieTitleAsync і одразу дочекайся результату через await, бо без назви ми не запустимо наступний метод.
+Крок 2: Тепер, коли у тебе є назва, запусти паралельно:
+GetMovieRatingAsync(title) (передай туди назву).
+GetPosterUrlAsync().
+Крок 3: Дочекайся завершення обох через await Task.WhenAll(...).
+Крок 4: Виведи повну інформацію: назву, рейтинг та посилання на постер.
+
+✅ Рішення:
+string movieTitle = await GetMovieTitleAsync();
+
+Task<double> rating = GetMovieRatingAsync(movieTitle);
+Task<string> poster = GetPosterUrlAsync();
+
+await Task.WhenAll(rating, poster);
+double ratingResult = await rating;
+string posterURL = await poster;
+Console.WriteLine($"Фільм {movieTitle} з рейтингом {ratingResult} і адресою на постер {posterURL}");
+
+async Task<string> GetMovieTitleAsync()
+{
+    await Task.Delay(2000);
+    return "Inception";
+}
+
+async Task<double> GetMovieRatingAsync(string title)
+{
+    await Task.Delay(1000);
+    return 8.8;
+}
+
+async Task<string> GetPosterUrlAsync()
+{
+    await Task.Delay(2500);
+    return "https://posters.com/inception.jpg";
+}
