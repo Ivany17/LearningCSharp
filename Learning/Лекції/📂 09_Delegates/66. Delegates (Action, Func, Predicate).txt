@@ -1,0 +1,262 @@
+🧬 Тема №66: Вбудовані делегати (Action, Func, Predicate) та Лямбда-вирази 🔏
+Ці делегати живуть у просторі назв System. Вони є готовими шаблонами у .NET, 
+тому завдяки їм більше не потрібно створювати власні типи через ключове слово delegate. 
+Код позбувається зайвих оголошень, стає чистішим і сучаснішим.
+
+1. Теоретична частина 💡
+До цього моменту кожен метод у твоїй програмі мав ім'я (наприклад, GetMax). Але іноді нам потрібен метод лише один раз для конкретної маленької задачі. 
+Створювати для цього окремий метод у класі — це як купувати цілу вантажівку, щоб перевезти один пакет соку.
+Анонімні методи — це методи без імені.
+
+Лямбда-вирази (=>) — це найкоротший спосіб запису таких методів. Читається як «йде в» або «стає».
+(параметри) => вираз_або_логіка
+
+🎬 1. Action (Для методів void)
+Використовується тоді, коли треба передати або виконати логіку, яка нічого не повертає (void).
+Що приймає: Від 0 до 16 параметрів різних типів.
+Що повертає: Нічого (void).
+Приклади: Action — без параметрів.
+Action<string> print = s => Console.WriteLine(s); — приймає рядок.
+
+🧬 2. Func (Король делегатів)
+Використовується, коли метод має щось обчислити і обов'язково повернути значення.
+Особливість: В кутових дужках < > вказуються типи вхідних параметрів, а останній тип — це завжди те, що метод поверне.
+Що приймає: Від 0 до 16 параметрів.
+Приклад: Func<int, int, int> sum = (a, b) => a + b; (Приймає два int, повертає int).
+
+🎯 3. Predicate (Фільтр-перевірка)
+Спеціальна звужена версія для перевірок (умов).
+Що приймає: Рівно один параметр.
+Що повертає: Завжди bool (true або false).
+Синтаксис: Predicate<int> — це повний еквівалент Func<int, bool>.
+Приклад: Predicate<int> isPositive = n => n > 0;
+
+Рівень 1: Лямбди як змінні (Одинарне використання)
+📝 Завдання №66.1: "Математичний привид" 👻
+Давай створимо логіку, яка не прив'язана до жодного класу. Тобі потрібно реалізувати калькулятор, де операції — це змінні.
+Твої кроки:
+Використай вбудований делегат Func<int, int, int>. Він означає: метод приймає два int і повертає int.
+Створи змінну multiply і за допомогою лямбда-виразу (a, b) => ... реалізуй множення.
+Створи змінну sum і реалізуй додавання.
+Виклич обидві змінні з числами 10 та 5 і виведи результат у консоль.
+
+✅ Рішення:
+Func<int, int, int> multiply = (a, b) => a * b;
+Func<int, int, int> sum = (a, b) => a + b;
+
+Console.WriteLine(multiply(10, 5));
+Console.WriteLine(sum(10, 5));
+
+📝 Завдання №66.2: "Універсальний фільтр"
+Давай спробуємо написати лямбду, яка перевіряє текст. Це наблизить нас до того, як працюють складні пошукові системи.
+Твої кроки:
+Створи змінну типу Func<string, bool> з назвою isLongWord.
+Напиши лямбду, яка повертає true, якщо довжина слова (Length) більша за 10 символів.
+Перевір її двома словами: "Csharp" та "ProgrammingIsAwesome".
+Виведи результат (True/False) у консоль.
+
+✅ Рішення:
+Func<string, bool> isLongWord = w => w.Length > 10 && w.StartsWith("P");
+Console.WriteLine(isLongWord("ProgrammingIsAwesome"));
+Console.WriteLine(isLongWord("Csharp"));
+
+📝 Завдання №66.3:
+Уяви, що ми створюємо систему фільтрації повідомлень.
+Створи делегат Predicate<string> (ти вже знаєш, що він повертає bool).
+Присвой йому анонімний метод (використовуючи ключове слово delegate), який перевіряє, чи містить рядок слово "Error".
+Виклич його для рядка "System Error: disk not found" і виведи результат.
+
+✅ Рішення:
+Predicate<string> containsError = p => p.Contains("Error");
+Console.WriteLine(containsError("System Error: disk not found"));
+
+Рівень 2: Передача делегатів у методи (Професійне використання)
+📝 Завдання №66.4: Action - (Елементарне завдання на Action🔥)
+Давай почнемо з однієї маленької дії.
+Створи метод RunAction.
+Він має приймати лише один параметр: Action action (без кутових дужок, це найпростіший варіант).
+Всередині методу просто виклич цей action().
+Тобі потрібно викликати цей метод у верхній частині коду (над методом RunAction). 
+Оскільки Action у нас порожній (не має <T>), лямбда-вираз для нього теж буде "порожнім".
+Після цього створи поруч метод GreetUser.
+Він має приймати string name та Action<string> messageAction.
+Всередині методу виклич messageAction(name);.
+Виклич GreetUser("Іван", n => Console.WriteLine($"Вітаю, {n}!"));.
+
+✅ Рішення:
+RunAction(() => Console.WriteLine($"Привіт! Я перша Action-дія!"));
+GreetUser("Іван", n => Console.WriteLine($"Вітаю, {n}!"));
+
+void RunAction(Action action)
+{
+    action();
+}
+
+void GreetUser(string name, Action<string> messageAction) // не забувай, що делегатам необхідно давати імена (messageAction)
+{
+    messageAction(name);
+}
+
+📝 Завдання №66.5: Action - Майстер логування
+Твоя мета — написати невелику систему, яка імітує збереження даних, але спосіб "сповіщення" про успіх ми будемо передавати через Action.
+Метод-виконавець: Створи метод SaveData.
+Він має приймати два параметри: string data та Action<string> onComplete.
+Логіка всередині:
+Просто виведи в консоль повідомлення: "Зберігаю дані: [data]...".
+Після цього виклич onComplete, передавши туди текст "Успішно збережено!".
+Виклики в Top-level (Main):
+Перший виклик: Виклич SaveData, передавши будь-який текст. У лямбді для Action просто виведи отримане повідомлення у консоль.
+Другий виклик (Кольоровий): Виклич SaveData ще раз. Але цього разу напиши лямбду в фігурних дужках { }, 
+яка змінить колір консолі на зелений, виведе повідомлення і скине колір назад.
+Зміни тип делегата на Action<int>.
+Всередині методу викликай: onComplete(data.Length);.
+У виклику (лямбді) напиши: len => Console.WriteLine($"Довжина даних: {len}");.
+
+✅ Рішення:
+SaveData("data", len => Console.WriteLine($"Довжина даних: {len}"));
+SaveData("some information", t =>
+{
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine(t);
+        Console.ResetColor();
+});
+
+void SaveData(string data, Action<int> onComplete)
+{
+    Console.WriteLine($"Зберігаю дані: {data}...");
+    onComplete(data.Length);
+}
+
+🛠️ Завдання №66.6: Func - Споживач результату (Метод void)
+Напиши метод, який використовує Func, але сам нічого не повертає.
+Метод: Створи void AnalyzeText.
+Параметри: Приймає string text та Func<string, int> counter.
+Логіка:
+Виклич counter, передавши туди text.
+Отримане число відразу виведи в консоль: "Результат аналізу: [число]".
+Не пиши return! Метод має бути void.
+У Main:
+Виклич AnalyzeText("Hello World", s => s.Length);.
+
+✅ Рішення:
+AnalyzeText("Hello World", s => s.Length);
+
+void AnalyzeText(string text, Func<string, int> counter)
+{
+    int number = counter(text);
+    Console.WriteLine($"Результат аналізу: {number}");
+}
+
+🔧 Завдання №66.7: Predicate - Фільтр паролів
+Давай створимо метод, який перевіряє, чи підходить пароль під наші вимоги.
+Метод-виконавець: Створи метод ValidatePassword.
+Він має бути типу void.
+Параметри: string password та Predicate<string> check.
+Логіка всередині:
+Створи змінну bool isValid = check(password);.
+Якщо isValid — виведи: "Пароль прийнято!".
+Інакше — виведи: "Пароль занадто слабкий!".
+У Main:
+Виклич ValidatePassword, передавши пароль (наприклад, "123") та лямбду, яка перевіряє, чи довжина пароля більша за 6 символів.
+
+✅ Рішення:
+ValidatePassword("123ght123", p => p.Length > 6);
+
+void ValidatePassword(string password, Predicate<string> check)
+{
+    bool isValid = check(password);
+    if (isValid)
+    {
+        Console.WriteLine($"Пароль '{password}' прийнято!");
+    } else
+    {
+        Console.WriteLine($"Пароль '{password}' занадто слабкий!");
+    }
+}
+
+Рівень 3: Конвеєри та об'єднання делегатів (Супер-рівень)
+🌟 Зіркове завдання 66.8: Predicate, Func і Action - «Контроль якості»
+Пам'ятай, що порядок аргументів при виклику має критичне значення. 
+Оскільки типи мають різні сигнатури, міняти їх місцями заборонено — компілятор видасть помилку.
+Об’єкт: Створи новий клас Smartphone (з полями Model та BatteryLife).
+Метод-менеджер: Створи метод InspectProduct.
+Тип: void.
+Параметри:
+Об’єкт (смартфон).
+Predicate<Smartphone> check — чи проходить пристрій тест.
+Func<Smartphone, string> reportGenerator — створює текст звіту.
+Action<string> finalStep — що зробити зі звітом.
+Логіка всередині:
+Спочатку перевір об’єкт через Predicate.
+Якщо тест пройдено (true):
+Згенеруй текст звіту через Func.
+Відправ цей текст в Action.
+Якщо не пройдено — просто напиши в консоль: "Брак! Відправлено на переробку".
+🛠️ Що написати в Main:
+Створи об’єкт (наприклад, iPhone з рівнем батареї 73).
+Predicate: Перевіряє, чи батарея > 50.
+Func: Приймає смартфон і повертає рядок: "Смартфон {Model} ще може працювати".
+Action: Виводить отриманий рядок синім кольором.
+
+✅ Рішення:
+Smartphone Samsung = new Smartphone{ Model = "Samsung", BatteryLife = 31 };
+InspectProduct(Samsung, 
+                    batLevel => batLevel.BatteryLife > 50,                                            // Predicate
+                    str => $"Смартфон {str.Model} має заряд {str.BatteryLife}% і ще може працювати",  // Func
+                    blueString =>                                                                     // Action
+                    {
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        Console.WriteLine(blueString);
+                        Console.ResetColor();
+                    });
+
+void InspectProduct(Smartphone smartphone, Predicate<Smartphone> check, Func<Smartphone, string> reportGenerator, Action<string> finalStep)
+{
+    bool isChecked = check(smartphone);
+    if (isChecked)
+    {
+        string reported = reportGenerator(smartphone);
+        finalStep(reported);
+    } else
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"{smartphone.Model} має заряд {smartphone.BatteryLife}% і майже розряджений! Відправлено на дозарядку");
+        Console.ResetColor();
+    }
+}
+
+class Smartphone
+{
+    public string Model { get; set; } = "";
+    public int BatteryLife { get; set; }
+}
+
+📝 Завдання №66.9: "Модерація та публікація відгуків" 📝
+Уяви, що ти пишеш систему автоматичної обробки відгуків про товари.
+Твоя мета:
+Головний метод: Створи метод ProcessReview. Він повинен приймати 4 параметри:
+string reviewText — початковий текст відгуку.
+Predicate<string> filter — перевірка, чи проходить відгук цензуру.
+Func<string, string> processor — виправлення або форматування тексту.
+Action<string> publisher — фінальна дія з готовим текстом.
+Логіка всередині ProcessReview:
+Якщо відгук проходить перевірку filter, то ми трансформуємо його через processor і передаємо результат у publisher.
+Якщо не проходить — нічого не робимо (або можна нічого не виводити).
+У точці старту програми з нуля:
+Виклич метод ProcessReview прямо через лямбда-вирази для тексту: "Цей товар просто супер!"
+Для Predicate: перевірка, чи довжина тексту більша за 5 символів.
+Для Func: переведення всього тексту у верхній регістр (t => t.ToUpper()).
+Для Action: виведення результату в консоль у форматі: $"[ОПУБЛІКОВАНО]: {res}".
+
+✅ Рішення:
+ProcessReview("Цей товар просто супер!", t => t.Length > 5, t => t.ToUpper(), res => Console.WriteLine($"[ОПУБЛІКОВАНО]: {res}"));
+
+void ProcessReview(string reviewText, Predicate<string> filter, Func<string, string> processor, Action<string> publisher)
+{
+    string finalText = reviewText;
+    if (filter(reviewText) == true)
+    {
+        finalText = processor(reviewText);
+        publisher(finalText);
+    }
+}
