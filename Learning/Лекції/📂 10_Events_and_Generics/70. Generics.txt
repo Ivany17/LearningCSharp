@@ -1,0 +1,313 @@
+Тема №70: Узагадльнення (Generics) 🔗
+📦 1. Суть концепції
+Уявіть собі універсальну коробку. Ви можете покласти туди яблуко, а можете — телефон. 
+Але головне: коли ви дістаєте річ назад, ви точно знаєте, що це яблуко, і вам не треба це перевіряти.
+У C# Generics дозволяють створювати класи, методи або інтерфейси, де тип даних стає параметром.
+
+🧩 2. Навіщо вони потрібні?
+До появи Generics програмісти використовували тип object. Але це було повільно (процеси boxing/unboxing) 
+і небезпечно (можна було випадково спробувати додати число до рядка, і програма падала б під час роботи).
+Generics вирішують це так:
+
+🚀 Швидкість: Працюють так само швидко, як звичайні типи.
+🛡️ Безпека: Помилку з типом даних ви побачите ще під час написання коду (компіляції), а не коли програма вже запущена.
+♻️ Повторне використання: Один і той самий код працює для int, string, Movie чи Student.
+
+🔠 3. Синтаксис: Магічна літера <T>
+Коли ви бачите <T> після назви класу чи методу — це і є Generic. Буква T розшифровується як Type (Тип). Це просто заповнювач (placeholder).
+// Ми кажемо: "Це коробка, яка буде зберігати щось типу T"
+public class Box<T> 
+{
+    public T Content { get; set; }
+}
+
+Коли ми створюємо об'єкт, ми замість T підставляємо реальний тип:
+Box<int> intBox = new Box<int>(); // Тепер Content — це int.
+Box<string> strBox = new Box<string>(); // Тепер Content — це string.
+
+🛠️ Як це працює в методах?
+Ви можете зробити універсальним не весь клас, а лише один метод. Наприклад, метод, який міняє місцями два елементи або просто виводить їх на екран.
+public void PrintData<T>(T data) 
+{
+    Console.WriteLine($"Дані: {data}");
+}
+
+Тепер ви можете передати туди і число, і об'єкт Movie — метод "підлаштується".
+
+📝 Завдання №70.1: "Універсальне сховище"
+Давай почнемо з найпростішого фундаменту, щоб ти відчув, як працює заміна <T>.
+Завдання:
+Створи клас з назвою Storage<T>.
+Додай у цей клас одну властивість (Property) з назвою Item. Тип цієї властивості має бути T.
+Зроби цю властивість доступною лише для читання через конструктор (як ми вчили: { get; }).
+У Main (або Top-level statements) створи два об'єкти цього класу:
+Перший — для зберігання цілого числа (наприклад, 100).
+Другий — для зберігання рядка (наприклад, "Hello Generics").
+Виведи значення Item обох об'єктів у консоль.
+
+✅ Рішення:
+Storage<int> intStorage = new Storage<int>(100);
+Storage<string> stringStorage = new Storage<string>("Hello Generics");
+
+Console.WriteLine(intStorage.Item);
+Console.WriteLine(stringStorage.Item);
+
+public class Storage<T>
+{
+    public T Item { get; }
+    public Storage(T item)
+    {
+        Item = item;
+    }
+}
+
+📝 Завдання №70.2: "Універсальний принтер" (Generic методи) 🖨
+Тепер давай зробимо крок вперед. Generics можна використовувати не тільки для класів, а й для окремих методів.
+Твоє завдання:
+Створи звичайний (не generic) клас Utility.
+Додай у нього статичний generic метод з назвою PrintInfo<T>.
+Цей метод має приймати один параметр типу T з назвою data.
+Всередині методу просто виведи в консоль: "Тип даних: {тип}, Значення: {data}".
+Підказка: Щоб дізнатися назву типу, використай data.GetType().Name.
+Виклич цей метод у Main тричі: з числом, з рядком і з логічним значенням (true/false).
+
+✅ Рішення:
+Utility.PrintInfo(100); // Utility.PrintInfo, оскільки PrintInfo - static. Статичні методи: Викликаються через Ім'яКласу.Метод().
+Utility.PrintInfo("string");
+Utility.PrintInfo<bool>(true); // Можна вказувати тип явно, але не обов'язково
+
+public class Utility
+{
+    public static void PrintInfo<T>(T data)
+    {
+        Console.WriteLine($"Тип даних: {data?.GetType().Name}, Значення: {data}"); // data? аби зникло жовте повідомлення
+    }
+}
+
+🚀 Завдання №70.3: "Універсальний перетворювач" (Generic EventArgs)
+Створи generic клас UniversalArgs<T>. Він має спадкуватися від EventArgs.
+Всередині додай властивість Value типу T. Зроби її лише для читання ({ get; }) через конструктор.
+У класі Cinema оголоси подію:
+public event EventHandler<UniversalArgs<List<Movie>>>? OnWatching;
+Створи метод Watch(), який викликає цю подію через Invoke і передає туди назву фільму (наприклад, "Interstellar").
+Підказка: OnWatching?.Invoke(this, new UniversalArgs<List<Movie>>(movies));
+Підпишись на подію в Main і виведи список фільмів.
+Створи клас Fan (Фанат).
+Додай йому метод WatchAction(object? sender, UniversalArgs<List<Movie>> e).
+Всередині за допомогою LINQ виведи тільки назви фільмів, де жанр містить "Action".
+У Main підпиши цього фаната на ту саму подію cinema.OnWatching.
+
+✅ Рішення:
+Cinema cinema = new Cinema { };
+Critic critic = new Critic { };
+Fan fan = new Fan { };
+cinema.OnWatching += critic.CriticMovies;
+cinema.OnWatching += fan.WatchAction;
+cinema.Watch();
+
+class Movie
+{
+    public string Title { get; } = "";
+    public string Genre { get; } = "";
+    public double Rating { get; }
+    public Movie(string title, string genre, double rating)
+    {
+        Title = title;
+        Genre = genre;
+        Rating = rating;
+    }
+}
+
+public class UniversalArgs<T> : EventArgs
+{
+    public T Value { get; }
+    public UniversalArgs(T value)
+    {
+        Value = value;
+    }
+}
+
+class Cinema
+{
+    public event EventHandler<UniversalArgs<List<Movie>>>? OnWatching;
+    public void Watch()
+    {
+        List<Movie> movies = new List<Movie>{
+            new Movie ("Inception", "Sci-Fi/Action", 8.8),
+            new Movie ("The Grand Budapest Hotel", "Comedy/Adventure", 8.1),
+            new Movie ("The Dark Knight", "Action/Crime", 9.0),
+            new Movie ("Spirited Away", "Animation/Fantasy", 8.6),
+            new Movie ("Interstellar", "Sci-Fi/Drama", 8.7),
+            new Movie ("Pulp Fiction", "Crime/Drama", 8.9),
+            new Movie ("Whiplash", "Drama/Music", 8.5),
+            new Movie ("Mad Max: Fury Road", "Action/Adventure", 8.1),
+            new Movie ("The Shawshank Redemption", "Drama", 9.3),
+            new Movie ("Everything Everywhere All at Once", "Sci-Fi/Adventure", 7.8),
+            new Movie ("Blade Runner 2049", "Sci-Fi/Mystery", 8.0),
+            new Movie ("Coco", "Animation/Family", 8.4),
+            new Movie ("The Prestige", "Drama/Mystery", 8.5),
+            new Movie ("Gladiator", "Action/Adventure", 8.5),
+        };
+        OnWatching?.Invoke(this, new UniversalArgs<List<Movie>>(movies));
+    }
+}
+
+class Critic
+{
+    public void CriticMovies(object? sender, UniversalArgs<List<Movie>> e)
+    {
+        var bestDramaMovies = e.Value.Where(m => m.Genre.Contains("Drama") && m.Rating > 8.5);
+        foreach (var film in bestDramaMovies)
+        {
+            Console.WriteLine($"Рекомендую: {film.Title}");
+        }
+    }
+}
+
+class Fan
+{
+    public void WatchAction(object? sender, UniversalArgs<List<Movie>> e)
+    {
+        var ActionMovies = e.Value.Where(m => m.Genre.Contains("Action")).Select(m => m.Title);
+        Console.WriteLine($"Фільми в жанрі Action: " + string.Join(", ", ActionMovies ?? new List<string>()));
+    }
+}
+
+🛠️ Завдання №70.4: "Універсальний порівнювач"
+Уяви, що тобі потрібно написати метод, який порівнює два значення і повертає найбільше з них. 
+Але ти не знаєш, що це буде: два числа int, дві ціни double чи два рядки.
+Твоє завдання:
+Створи статичний клас CompareUtility.
+Додай у нього статик-метод GetMax<T>(T a, T b).
+Оскільки ми ще не проходили "обмеження" (constraints), я дам тобі маленьку підказку: щоб порівняти два T, 
+використай стандартний метод Comparer<T>.Default.Compare(a, b).
+Як це працює: цей метод повертає число більше за 0, якщо a > b.
+Метод має повернути те значення, яке виявилося більшим.
+У Main виклич цей метод для:
+Двох чисел: 10 та 25.
+Двох рядків: "Apple" та "Banana".
+
+✅ Рішення:
+Console.WriteLine(CompareUtility.GetMax(10, 25));
+Console.WriteLine(CompareUtility.GetMax(345, 2));
+Console.WriteLine(CompareUtility.GetMax("Apple", "Banana"));
+
+public static class CompareUtility
+{
+    public static T GetMax<T>(T a, T b)
+    {
+        if (Comparer<T>.Default.Compare(a, b) > 0)
+        {
+            return a;
+        }
+        return b;
+    }
+}
+
+🛠️ Завдання №70.5: "Скарбничка двох предметів"
+Це завдання навчить тебе працювати з декількома різними типами в одному класі. Так, Generic може приймати не тільки T, а й U, K тощо.
+Твоє завдання:
+Створи клас з назвою Pair<T, U>. (Тут T — це тип першого предмета, а U — тип другого).
+Додай у нього дві властивості:
+First типу T.
+Second типу U.
+Зроби їх лише для читання ({ get; }) і додай конструктор, який приймає обидва значення.
+У Main створи об'єкт цього класу, де:
+Перше значення — це номер місця (int).
+Друге значення — це ім'я пасажира (string).
+Виведи їх у консоль одним рядком: "Місце №...: пасажир ...".
+
+✅ Рішення:
+Pair<int, string> pair = new Pair<int, string>(12, "Ivan");
+Console.WriteLine($"Місце №{pair.First}: пасажир {pair.Second}");
+
+public class Pair<T, U>
+{
+    public T First { get; }
+    public U Second { get; }
+    public Pair(T first, U second)
+    {
+        First = first;
+        Second = second;
+    }
+}
+
+🛡️ Завдання №70.6: "Універсальний замінник" (Generic методи з логікою)
+Давай закріпимо базові методи. Ми не будемо використовувати складні порівняння, а зробимо просту операцію "підміни".
+Твоє завдання:
+Створи статичний клас Swapper.
+Напиши в ньому статичний метод SwapIfNull<T>(T primary, T backup).
+Логіка проста: якщо primary дорівнює null, метод має повернути backup. Якщо не null — повернути primary.
+Виклич цей метод у Main два рази:
+Перший раз: передай рядок null і рядок "Запасний текст".
+Другий раз: передай рядок "Оригінал" і "Запасний текст".
+Виведи результати.
+
+✅ Рішення:
+Console.WriteLine(Swapper.SwapIfNull(null, "Запасний текст"));
+Console.WriteLine(Swapper.SwapIfNull("Оригінал", "Запасний текст"));
+
+public static class Swapper
+{
+    public static T SwapIfNull<T>(T primary, T backup)
+    {
+        if (primary == null)
+        {
+            return backup;
+        }
+        else
+        {
+            return primary;
+        }
+    }
+}
+
+🛠️ Завдання №70.7: "Універсальний інвертор масивів"
+Уяви, що тобі потрібно розвернути задом наперед масив будь-яких даних (чисел, рядків або твоїх об'єктів Movie). 
+Замість того, щоб писати окремий метод для кожного типу, ми напишемо один — Generic.
+Твоє завдання:
+Створи статичний клас ArrayHelper.
+Напиши в ньому статичний метод ReverseArray<T>(T[] array).
+Логіка всередині:
+Тобі потрібно пройтися циклом for лише до середини масиву (array.Length / 2).
+Міняй місцями елементи: перший з останнім, другий з передостаннім і так далі.
+Ось кроки, які допоможуть тобі написати код всередині циклу:
+Збережи значення першого елемента: Оскільки ти збираєшся перезаписати array[i], спочатку збережи його значення в тимчасову змінну типу T.
+Знайди індекс "пари": Останній елемент має індекс array.Length - 1. 
+Але для кожного кроку i індекс "дзеркального" елемента з іншого кінця буде array.Length - 1 - i.
+Зроби обмін:
+Присвой значення "дзеркального" елемента в array[i].
+Присвой значення з тимчасової змінної в "дзеркальний" елемент.
+Підказка: Для обміну значень використай тимчасову змінну T temp.
+Метод не має нічого повертати (void), він повинен змінювати саме той масив, який у нього передали.
+У Main створи два масиви:
+Масив int[] із числами 1, 2, 3, 4, 5.
+Масив string[] із іменами ["Ivan", "Petro", "Alex"].
+Виклич ArrayHelper.ReverseArray для обох масивів і виведи результат у консоль (через foreach або string.Join), щоб переконатися, що порядок змінився.
+
+✅ Рішення:
+int[] numbers = { 1, 2, 3, 4, 5 };
+string[] names = { "Ivan", "Petro", "Alex" };
+ArrayHelper.ReverseArray(numbers);
+ArrayHelper.ReverseArray(names);
+
+Console.WriteLine(string.Join(", ", numbers));
+Console.WriteLine(string.Join(", ", names));
+
+public static class ArrayHelper
+{
+    public static void ReverseArray<T>(T[] array)
+    {
+        for (int i = 0; i < array.Length / 2; i++)
+        {
+            // 1. Створюємо "дзеркальний" індекс (елемент з іншого кінця масиву)
+            int j = array.Length - 1 - i;
+            // 2. Зберігаємо значення лівого елемента у temp
+            T temp = array[i];
+            // 3. Записуємо значення правого елемента у лівий
+            array[i] = array[j];
+            // 4. Записуємо значення з temp у правий елемент
+            array[j] = temp;
+        }
+    }
+}
