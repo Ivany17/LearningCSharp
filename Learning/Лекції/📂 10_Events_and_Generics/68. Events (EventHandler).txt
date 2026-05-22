@@ -1,0 +1,313 @@
+Урок №68: Стандарт EventHandler 🧩
+В системі .NET розробники домовилися: події мають виглядати однаково всюди, щоб будь-який програміст міг легко зрозуміти чужий код.
+
+👥 Чому Action<T> замало?
+Коли ми використовуємо Action<int>, ми передаємо лише одне число. Але в реальних програмах підписнику часто треба знати:
+Хто підняв подію? (Може, у нас 10 кнопок, і нам треба знати, яка саме натиснута).
+Додаткові дані: Разом із числом може знадобитися час, ім'я користувача або статус системи.
+EventHandler — це професійний стандарт .NET. Він замінює будь-який Action.
+Замість того, щоб вигадувати свої типи делегатів, Microsoft сказала: "Використовуйте EventHandler. 
+Першим параметром завжди йде той, хто відправив (sender), другим — дані (EventArgs)".
+
+EventHandler - це системний делегат	і його не можна перейменувати. Це "шаблон" методу. 
+Він каже: "Будь-який метод-обробник МАЄ приймати (object, EventArgs)". Він замінює собою Action.
+
+EventArgs - це системний клас і його не можна перейменувати. Контейнер для даних події.
+
+Empty - це статична властивість	 і її не можна перейменувати. Означає "порожній контейнер". 
+Використовуємо, коли нам треба передати EventArgs, але реальних даних немає.
+
+sender - це	назва параметра	і її можна перейменувати. Змінна, яка приймає того, хто викликав подію. Можна назвати whoSentThis.
+
+this - це ключове слово	і його не можна перейменувати. Означає "я сам". Картка передає в метод sender посилання на саму себе.
+
+object - це базовий тип	і його не можна перейменувати. Він "Прабатько" всіх класів у C#.
+Оскільки на одну подію можуть бути підписані різні класи, C# використовує найуніверсальніший тип, який може прийняти будь-що.
+Використовується для sender, щоб туди міг потрапити будь-який об'єкт.
+
+e - це назва параметраа	і її можна перейменувати. Змінна, що містить дані події. Можна назвати data або args.
+
+🛠️ Складові стандарту
+Стандартна подія в C# завжди приймає два аргументи:
+object? sender (Відправник):
+Це посилання на сам об'єкт, який викликав подію.
+Завдяки цьому ми можемо підписати один метод на 10 різних термометрів і всередині методу розрізнити, який саме "закричав".
+EventArgs e (Аргументи події):
+Це базовий клас для передачі даних.
+Якщо даних немає, передають EventArgs.Empty.
+Якщо дані є, ми створюємо свій клас, який наслідується від EventArgs.
+
+🤝 В реальних програмах подія — це не просто дзвінок, це передача інформації. 
+Наприклад, якщо спрацювала сигналізація в авто, власнику важливо знати: яка саме зона постраждала (двері, капот чи багажник) 
+та о котрій годині це сталося.
+Для цього ми створюємо власний клас посилки.
+
+📦 Як передати дані через EventArgs
+Щоб передати свої дані, нам потрібно створити клас, який наслідується від системного EventArgs.
+
+Крок 1️⃣: Створюємо клас даних
+public class AlarmEventArgs : EventArgs
+{
+    public string Zone { get; }
+    public string Time { get; }
+
+    public AlarmEventArgs(string zone, string time)
+    {
+        Zone = zone;
+        Time = time;
+    }
+}
+
+Крок 2️⃣: Оголошуємо подію з цим класом
+Замість просто EventHandler, ми пишемо EventHandler<T>, де T — наш новий клас:
+public event EventHandler<AlarmEventArgs>? OnAlarmTriggered;
+
+Крок 3️⃣: Викликаємо з даними
+Тепер ми не пишемо Empty, а створюємо об'єкт нашого класу:
+OnAlarmTriggered?.Invoke(this, new AlarmEventArgs("Двері водія", "12:30"));
+
+📝 Найелементарніше завдання 68.1:
+Умова:
+Клас BankCard:
+Оголоси подію так: public event EventHandler? OnBlocked; (Зверни увагу: тут не треба писати Action, EventHandler — це вже вбудований делегат).
+Створи метод public void Block(), який запускає подію: OnBlocked?.Invoke(this, EventArgs.Empty);.
+Підказка: this — це і є той самий sender, тобто сама картка.
+Клас SecuritySystem:
+Створи метод: public void LogBlock(object? sender, EventArgs e).
+Метод має просто писати: "Система: Отримано сигнал про блокування картки!".
+У Main:
+Створи картку, підпиши систему на OnBlocked і виклич card.Block().
+
+✅ Рішення:
+BankCard visa = new BankCard{};
+SecuritySystem security = new SecuritySystem{};
+visa.OnBlocked += security.LogBlock;
+visa.Block();
+
+class BankCard
+{
+    public event EventHandler? OnBlocked;
+    public void Block()
+    {
+        OnBlocked?.Invoke(this, EventArgs.Empty);
+    }
+}
+
+class SecuritySystem
+{
+    public void LogBlock(object? sender, EventArgs e)
+    {
+        Console.WriteLine($"Система: Отримано сигнал про блокування картки!");
+    }
+}
+
+📝 Завдання 68.2: "Пульт та Телевізор"
+Уяви: у тебе є Пульт (Remote), на якому натискають кнопку, і Телевізор (TV), який має на це зреагувати.
+Клас RemoteControl (Видавець):
+Створи в ньому подію за стандартом EventHandler. Назви її OnPowerButtonPressed.
+Створи публічний метод PressButton().
+Всередині цього методу викликай подію (не забудь про this та EventArgs.Empty).
+Клас Television (Підписник):
+Створи метод, який відповідає стандарту (приймає object? sender та EventArgs e). Назви його TogglePower.
+Всередині методу просто виведи в консоль: "ТВ: Перемикаю стан живлення...".
+У Main:
+Створи об'єкт пульту.
+Створи об'єкт телевізора.
+Підпиши телевізор на пульт через оператор +=.
+Виклич метод PressButton() у пульту.
+
+✅ Рішення:
+Remote remote = new Remote();
+Television tv = new Television();
+
+remote.OnPowerButtonPressed += tv.TogglePower;
+remote.PressButton();
+
+class Remote
+{
+    public event EventHandler? OnPowerButtonPressed;
+    public void PressButton()
+    {
+        OnPowerButtonPressed?.Invoke(this, EventArgs.Empty);
+    }
+}
+
+class Television
+{
+    public void TogglePower(object? whoSentThis, EventArgs data)
+    {
+        Console.WriteLine("ТВ: Перемикаю стан живлення...");
+    }
+}
+
+📝 Завдання 68.3: «Система безпеки авто»
+Уяви: у нас є Машина (Car). Коли спрацьовує її Сигналізація (Alarm), 
+на це мають одночасно зреагувати два різні об'єкти: Сирена (Sirene) та Власник (Owner).
+📋 Що треба зробити:
+Клас Car (Видавець):
+Створи подію OnAlarmTriggered за стандартом EventHandler.
+Створи метод public void TriggerAlarm().
+Всередині методу викликай подію (використовуй вже знайомий тобі рядок з this та EventArgs.Empty).
+Клас Sirene (Підписник №1):
+Створи метод public void MakeNoise(object? sender, EventArgs e).
+Він має виводити: "Сирена: ВІУ-ВІУ-ВІУ! Блимаю фарами!".
+Клас Owner (Підписник №2):
+Створи метод public void GetNotification(object? sender, EventArgs e).
+Він має виводити: "Власник: Отримав сповіщення на телефон! Біжу до авто!".
+У Main (Зв'язка):
+Створи один об'єкт Car.
+Створи один об'єкт Sirene та один Owner.
+Підпиши обох на одну й ту саму подію машини:
+car.OnAlarmTriggered += sirene.MakeNoise;
+car.OnAlarmTriggered += owner.GetNotification;
+Виклич метод car.TriggerAlarm();.
+
+✅ Рішення:
+Car car = new Car{};
+Sirene sirene = new Sirene{};
+Owner owner = new Owner();
+
+car.OnAlarmTriggered += sirene.MakeNoise;
+car.OnAlarmTriggered += owner.GetNotification;
+car.TriggerAlarm();
+
+class Car
+{
+    public event EventHandler? OnAlarmTriggered;
+    public void TriggerAlarm()
+    {
+        OnAlarmTriggered?.Invoke(this, EventArgs.Empty);
+    }
+}
+
+class Sirene
+{
+    public void MakeNoise(object? sender, EventArgs e)
+    {
+        Console.WriteLine($"Сирена: ВІУ-ВІУ-ВІУ! Блимаю фарами!");
+    }
+}
+
+class Owner
+{
+    public void GetNotification(object? sender, EventArgs e)
+    {
+        Console.WriteLine($"Власник: Отримав сповіщення на телефон! Біжу до авто!");
+    }
+}
+
+
+🚀 Завдання 68.4: "Остання перевірка (Самостійна на 100%)"
+Давай перевіримо, чи зможеш ти поєднати власні дані та відписку (-=).
+Умова:
+Уяви систему "Розумний поштовий ящик".
+Клас MailArgs: має містити string SenderName (хто надіслав листа).
+Клас Mailbox: має подію OnMailReceived з твоїми MailArgs.
+Клас Phone: має метод, який пише: "Телефон: Новий лист від {e.SenderName}".
+У Main:
+Підпиши телефон на ящик.
+Відправ листа через Invoke.
+Відпиши телефон.
+Відправ ще одного листа (в терміналі не має бути другого повідомлення).
+
+✅ Рішення:
+Mailbox mailbox = new Mailbox{};
+Phone phone = new Phone{};
+mailbox.OnMailReceived += phone.Receive;
+mailbox.SendTheMessage();
+mailbox.OnMailReceived -= phone.Receive;
+mailbox.SendTheMessage();
+
+class MailArgs : EventArgs 
+{
+    public string SenderName { get; }
+
+    public MailArgs(string senderName)
+    {
+        SenderName = senderName;
+    }
+}
+
+class Mailbox
+{
+    public event EventHandler<MailArgs>? OnMailReceived;
+    public void SendTheMessage()
+    {
+        OnMailReceived?.Invoke(this, new MailArgs("Valeria"));
+    }
+}
+
+class Phone
+{
+    public void Receive(object? sender, MailArgs e)
+    {
+        Console.WriteLine($"Телефон: Новий лист від {e.SenderName}");
+    }
+}
+
+🚀 Завдання 68.5: "Банківський моніторинг"
+Уяви систему безпеки банку. Коли з картки знімаються гроші, банк має повідомити про це клієнта.
+1. Клас TransactionArgs (Посилка з даними):
+Наслідується від EventArgs.
+Має властивість double Amount (сума зняття).
+Має властивість string Status (наприклад, "Успішно" або "Підозріло").
+2. Клас BankCard (Видавець):
+Має подію OnWithdrawal (використовуй EventHandler<TransactionArgs>).
+Має метод public void MakePurchase(double sum).
+Всередині методу:
+Викликай подію через Invoke.
+Якщо сума більше 10 000, передавай статус "Підозріло", якщо менше — "Успішно".
+3. Клас SmsService (Підписник):
+Має метод-обробник (пам'ятай про правильні параметри object? sender та TransactionArgs e).
+Виводить у консоль: "SMS: Знято {e.Amount} грн. Статус: {e.Status}".
+4. У Main (Твоя перевірка):
+Створи об'єкти картки та сервісу.
+Підпиши сервіс на подію.
+Зроби покупку на 500 грн.
+Зроби покупку на 15 000 грн.
+Відпиши сервіс.
+Зроби ще одну покупку (консоль має мовчати).
+
+✅ Рішення:
+BankCard card = new BankCard{};
+SmsService sms = new SmsService{};
+
+card.OnWithdrawal += sms.message;
+card.MakePurchase(500);
+card.MakePurchase(15000);
+card.OnWithdrawal -= sms.message;
+card.MakePurchase(200);
+
+class TransactionArgs : EventArgs
+{
+    public double Amount { get; }
+    public string Status { get; } = "";
+    public TransactionArgs(double amount, string status)
+    {
+        Amount = amount;
+        Status = status;
+    }
+}
+
+class BankCard
+{
+    public event EventHandler<TransactionArgs>? OnWithdrawal;
+    public void MakePurchase(double sum)
+    {
+        if(sum > 10000)
+        {
+            OnWithdrawal?.Invoke(this, new TransactionArgs(sum, "Підозріло"));
+        } else
+        {
+            OnWithdrawal?.Invoke(this, new TransactionArgs(sum, "Успішно"));
+        }
+    }
+}
+
+class SmsService
+{
+    public void message(object? sender, TransactionArgs e)
+    {
+        Console.WriteLine($"SMS: Знято {e.Amount} грн. Статус: {e.Status}");
+    }
+}
