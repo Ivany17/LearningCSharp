@@ -1,0 +1,237 @@
+Тема №69: Практика LINQ у подіях (Events)
+Це логічне продовження твого навчання. Ми беремо Events (як спосіб передачі даних) і додаємо LINQ (як спосіб швидкої обробки цих даних).
+В чому суть завдання?
+Уяви реальну ситуацію: сервер моніторить 100 пристроїв. Коли стається звіт, він присилає нам весь список. 
+Але нам не цікаві ті, що працюють добре. Нам потрібно за допомогою LINQ миттєво відфільтрувати тільки "зламані".
+
+📝 Завдання №69.1:
+Створи клас Device:
+Властивості: Name та Status (тип string).
+Додай конструктор, щоб зручно задавати ім'я та статус.
+Створи клас SystemArgs (нащадок EventArgs):
+Повинен містити список пристроїв: public List<Device> AllDevices { get; }.
+Створи клас Monitor (Видавець):
+Подія: public event EventHandler<SystemArgs>? OnReportReady;.
+Метод GenerateReport():
+Створює List<Device> і додає туди 5 пристроїв. Наприклад: "Роутер" (OK), "Принтер" (Error), "Сервер" (OK), "Камера" (Error), "Сканер" (Error).
+Викликає (Invoke) подію і передає цей список у SystemArgs.
+Створи клас AdminPanel (Підписник):
+Має метод-обробник (той самий Message або OnEvent).
+Ось тут головне: Всередині цього методу використай e.AllDevices.Where(...), щоб знайти тільки ті пристрої, у яких статус "Error".
+Виведи імена цих зламаних пристроїв у консоль.
+Створити об'єкти Monitor та AdminPanel.
+Підписати admin.Message на подку monitor.OnReportReady.
+Викликати monitor.GenerateReport().
+
+✅ Рішення:
+Monitor monitor = new Monitor { };
+AdminPanel panel = new AdminPanel { };
+monitor.OnReportReady += panel.Message;
+monitor.GenerateReport();
+
+
+class Device
+{
+    public string Name { get; } = "";
+    public string Status { get; } = "";
+    public Device(string name, string status)
+    {
+        Name = name;
+        Status = status;
+    }
+}
+
+class SystemArgs : EventArgs
+{
+    public List<Device>? AllDevices { get; }
+    public SystemArgs(List<Device> devices)
+    {
+        AllDevices = devices;
+    }
+}
+
+class Monitor
+{
+    public event EventHandler<SystemArgs>? OnReportReady;
+    public void GenerateReport()
+    {
+        List<Device> devices = new List<Device>
+            {
+                new Device("Router", "OK"),
+                new Device("Printer", "Error"),
+                new Device("Server", "OK"),
+                new Device("Camera", "Error"),
+                new Device("Scanner", "Error")
+            };
+        OnReportReady?.Invoke(this, new SystemArgs(devices));
+    }
+}
+
+class AdminPanel
+{
+    public void Message(object? sender, SystemArgs e)
+    {
+        var errorName = e.AllDevices?.Where(d => d.Status == "Error").Select(d => d.Name);
+        Console.WriteLine("Пристрої з помилками: " + string.Join(", ", errorName ?? new List<string>()));
+    }
+}
+
+🚀 Завдання 69.2: «Автоматизація складу»
+Уяви систему інтернет-магазину. Коли клієнт робить замовлення, склад отримує список товарів. 
+Завдання складу — миттєво відібрати тільки ті товари, які потребують спеціального пакування (наприклад, тендітні об'єкти).
+1. Клас Product
+Властивості: string Name та bool IsFragile (чи є товар тендітним).
+Конструктор для швидкого створення об'єкта.
+2. Клас OrderArgs (нащадок EventArgs)
+Властивість: List<Product> Items { get; }.
+Конструктор, який приймає цей список.
+3. Клас Store (Видавець)
+Подія: public event EventHandler<OrderArgs>? OnOrderPlaced;.
+Метод public void CreateOrder():
+Створює список List<Product> із 5-6 різних товарів (наприклад: "iPhone" — false, "Ваза" — true, "Дзеркало" — true, "Чайник" — false).
+Викликає подію OnOrderPlaced та передає туди список товарів.
+4. Клас Warehouse (Підписник)
+Метод-обробник (наприклад, ProcessOrder):
+Використовує LINQ, щоб відфільтрувати зі списку e.Items тільки ті товари, у яких IsFragile == true.
+Виводить у консоль повідомлення: "Увага! Потрібне спеціальне пакування для: [Назви тендітних товарів]".
+5. У Main
+Створи об'єкти, підпиши склад на магазин та запусти створення замовлення.
+
+✅ Рішення:
+Store store = new Store();
+Warehouse warehouse = new Warehouse();
+store.OnOrderPlaced += warehouse.ProcessOrder;
+store.CreateOrder();
+
+class Product
+{
+    public string Name { get; } = "";
+    public bool IsFragile { get; }
+    public Product(string name, bool isfragile)
+    {
+        Name = name;
+        IsFragile = isfragile;
+    }
+}
+
+class OrderArgs : EventArgs
+{
+    public List<Product>? Items { get; }
+    public OrderArgs(List<Product> items)
+    {
+        Items = items;
+    }
+}
+
+class Store
+{
+    public event EventHandler<OrderArgs>? OnOrderPlaced;
+    public void CreateOrder()
+    {
+        List<Product> items = new List<Product>
+        {
+            new Product("Vase", true),
+            new Product("Chips", false),
+            new Product("Laptop", true),
+            new Product("Pants", false),
+            new Product("Glasses", true),
+            new Product("Book", false),
+            new Product("Wallpaper", false)
+        };
+        OnOrderPlaced?.Invoke(this, new OrderArgs(items));
+    }
+}
+
+class Warehouse
+{
+    public void ProcessOrder(object? sender, OrderArgs e)
+    {
+        var orderedItems = e.Items?.Where(i => i.IsFragile == true).Select(i => i.Name);
+        if (orderedItems != null)
+        {
+            foreach (var it in orderedItems)
+            {
+                Console.WriteLine($"Увага! Потрібне спеціальне пакування для: {it}");
+            }
+        }
+    }
+}
+
+🚀 Завдання 69.3: «Система безпеки Аеропорту»
+Уяви, що ти розробляєш систему контролю для аеропорту. 
+Коли літак приземляється, він передає список пасажирів службі безпеки. Твоє завдання — відфільтрувати тих, хто викликає підозру.
+1. Клас Passenger
+Властивості: string Name, bool HasVisa, int BaggageWeight.
+Конструктор для ініціалізації цих полів.
+2. Клас FlightArgs (нащадок EventArgs)
+Властивість: List<Passenger> Passengers { get; }.
+Конструктор, що приймає цей список.
+3. Клас Airplane (Видавець)
+Подія: public event EventHandler<FlightArgs>? OnLanding;.
+Метод public void Land():
+Створює список із 6 пасажирів (частина з візами, частина без, з різною вагою багажу).
+Викликає подію OnLanding.
+4. Клас SecurityService (Підписник)
+Метод-обробник (наприклад, CheckSecurity):
+Використовує LINQ, щоб знайти пасажирів, які:
+НЕ мають візи (HasVisa == false).
+АБО мають багаж понад 30 кг.
+Виводить імена цих людей у консоль із заголовком: "Потрібна додаткова перевірка для: ...".
+5. Точка входу (Main)
+Створи об'єкти, підпиши службу на літак та виконай посадку.
+
+✅ Рішення:
+Airplane boeing = new Airplane();
+SecurityService security = new SecurityService();
+boeing.OnLanding += security.CheckSecurity;
+boeing.Land();
+
+class Passenger
+{
+    public string Name { get; } = "";
+    public bool HasVisa { get; }
+    public int BaggageWeight { get; }
+    public Passenger(string name, bool hasvisa, int weight)
+    {
+        Name = name;
+        HasVisa = hasvisa;
+        BaggageWeight = weight;
+    }
+}
+
+class FlightArgs : EventArgs
+{
+    public List<Passenger>? Passengers { get; }
+    public FlightArgs(List<Passenger> passengers)
+    {
+        Passengers = passengers;
+    }
+}
+
+class Airplane
+{
+    public event EventHandler<FlightArgs>? OnLanding;
+    public void Land()
+    {
+        List<Passenger> passengers = new List<Passenger>
+        {
+            new Passenger("Maria", true, 13),
+            new Passenger("Anton", false, 24),
+            new Passenger("Ivan", true, 30),
+            new Passenger("Robert", true, 51),
+            new Passenger("Olexandr", false, 63),
+            new Passenger("Valeria", true, 9),
+            new Passenger("Steven", false, 45),
+        };
+        OnLanding?.Invoke(this, new FlightArgs(passengers));
+    }
+}
+
+class SecurityService
+{
+    public void CheckSecurity(object? sender, FlightArgs e)
+    {
+        var suspiciousPassengers = e.Passengers?.Where(p => p.HasVisa == false || p.BaggageWeight > 30).Select(p => p.Name);
+        Console.WriteLine("Потрібна додаткова перевірка для: " + string.Join(", ", suspiciousPassengers ?? new List<string>()));
+    }
+}
