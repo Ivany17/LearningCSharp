@@ -1,0 +1,259 @@
+Тема №64: Делегати (Delegates) — Функції як параметри 🧬
+Делегат — це "змінна для методу".
+
+Звичайна змінна (наприклад, int) зберігає число. Делегат зберігає дію. 
+Це дозволяє передавати один метод всередину іншого методу як звичайний параметр.
+
+🏗️ Як це працює (3 прості кроки):
+1️⃣ Оголошення (Створення шаблону)
+Ми кажемо програмі: «Я хочу створити поштову скриньку, в яку можна покласти лише методи, що приймають один рядок і нічого не повертають».
+delegate void MyTemplate(string message);
+
+2️⃣ Створення методів (Реальні дії)
+Ми пишемо звичайні методи, які підходять під наш шаблон (теж void і теж з одним string).
+void SayHello(string name) => Console.WriteLine($"Привіт, {name}!");
+void SayBye(string name) => Console.WriteLine($"Бувай, {name}!");
+
+3️⃣ Використання (Магія делегата)
+Ми створюємо "змінну-делегат" і кладемо туди метод, як у коробку.
+MyTemplate action = SayHello; // Поклали метод у змінну
+action("Іван");               // Викликали метод через змінну
+
+📝 Завдання №64.1: "Стиліст тексту" ✍️
+Тобі потрібно створити систему, яка прикрашає текст.
+Делегат: delegate void TextStyler(string message); (це наш шаблон).
+Метод 1: void BlueStyle(string msg) — нехай він просто міняє колір консолі на синій і виводить msg.
+Метод 2: void StarStyle(string msg) — нехай він виводить *** {msg} ***.
+Метод 3: void RunStyle(string msg, TextStyler styler) — цей метод просто каже: styler(msg);.
+Виклич RunStyle, передавши туди текст "Тестове повідомлення" та метод BlueStyle.
+Виклич RunStyle ще раз, але передай метод StarStyle.
+Напиши новий метод UpperStyle, який буде виводити текст великими літерами (використовуй msg.ToUpper()).
+Потім виклич його через RunStyle.
+Створи змінну нашого типу-делегата:
+TextStyler superStyler;
+Поклади туди перший метод:
+superStyler = StarStyle;
+Додай туди другий метод через оператор += (так, як додаєш числа!):
+superStyler += UpperStyle;
+А тепер викликай:
+superStyler("Привіт!");
+
+✅ Рішення:
+void BlueStyle(string msg)
+{
+    Console.ForegroundColor = ConsoleColor.Blue; // Вмикаємо синій колір 🔵
+    Console.WriteLine(msg);                      // Друкуємо текст
+    Console.ResetColor();                        // Повертаємо звичайний колір (білий) ⚪
+}
+
+void StarStyle(string msg)
+{
+    Console.WriteLine($"*** {msg} ***");
+}
+
+void UpperStyle(string msg)
+{
+    Console.WriteLine(msg.ToUpper());
+}
+
+void RunStyle(string msg, TextStyler styler)
+{
+    styler(msg);
+}
+
+RunStyle("Тестове повідомлення", BlueStyle);
+RunStyle("Тестове повідомлення", StarStyle);
+RunStyle("Тестове повідомлення", UpperStyle);
+
+TextStyler superStyler;
+superStyler = StarStyle;
+superStyler += UpperStyle;
+superStyler("Привіт");
+
+delegate void TextStyler(string message);
+
+
+📝 Завдання 64.2 (String): «Генератор заголовків»
+Уяви, що ти пишеш двигун для блогу. Тобі потрібна функція, яка оформлює текст заголовка, 
+але користувач сам має обирати, як саме він хоче його бачити (наприклад, для соцмереж, для сайту чи для звіту).
+Твоє технічне завдання:
+Делегат: Створи делегат TitleFormatter. Він має приймати рядок (string) і повертати змінений рядок (string).
+Методи-реалізації: Створи три методи, які відповідають цьому шаблону:
+HashTagStyle: додає символ # перед словом (наприклад, "Hello" -> "#Hello").
+BracketStyle: бере слово в квадратні дужки (наприклад, "Hello" -> "[Hello]").
+UpperStyle: переводить слово у верхній регістр (ти це вже робив, закріпимо).
+Метод-виконавець: Створи метод PrintTitle.
+Він приймає текст (string) і дію (TitleFormatter).
+Він має викликати цю дію і вивести результат у консоль.
+Запуск: Виклич PrintTitle кілька разів з різними стилями для слова "Csharp".
+
+✅ Рішення:
+PrintTitle("Csharp", HashTagStyle);
+PrintTitle("Csharp", BracketStyle);
+PrintTitle("Csharp", UpperStyle);
+
+string HashTagStyle(string ttl)
+{
+    return $"#{ttl}";
+}
+
+string BracketStyle(string ttl)
+{
+    return $"[{ttl}]";
+}
+
+string UpperStyle(string ttl)
+{
+    return ttl.ToUpper();
+}
+
+void PrintTitle(string formatTitle, TitleFormatter formatter)
+{
+    string titleFormat = formatter(formatTitle);
+    Console.WriteLine($"{titleFormat}");
+}
+
+delegate string TitleFormatter(string title);
+
+🧱 Завдання 64.3 (Int): «Фільтр чисел»
+Це завдання буде трохи складнішим, бо ми поєднаємо делегати з тим, що ти вже знаєш — з масивами та циклами. 
+Це наблизить тебе до того, як працює LINQ (який ти вже почав вчити раніше).
+Твоє технічне завдання:
+Делегат: Створи делегат NumberFilter. Він має приймати одне число (int) і повертати bool (так/ні).
+Методи-логіка: Створи два методи:
+IsEven: повертає true, якщо число парне (наприклад, n % 2 == 0).
+IsPositive: повертає true, якщо число більше за 0.
+Метод-виконавець: Створи метод FilterArray.
+Він приймає масив чисел (int[] numbers) та дію-фільтр (NumberFilter filter).
+Всередині методу створи цикл foreach, який перебирає масив.
+Якщо filter(number) повертає true, виводь це число в консоль.
+Запуск:
+Створи масив: int[] myNumbers = { -5, -2, 0, 3, 8, 10 };
+Виклич FilterArray два рази: один раз для пошуку парних, другий — для додатних.
+
+✅ Рішення:
+int[] myNumbers = { -5, -2, 0, 3, 8, 10 };
+
+FilterArray(myNumbers, IsEven);
+FilterArray(myNumbers, IsPositive);
+
+bool IsEven(int num)
+{
+    if(num % 2 == 0)
+    {
+        return true;
+    } else
+    {
+        return false;
+    }
+}
+
+bool IsPositive(int num)
+{
+    if(num > 0)
+    {
+        return true;
+    } else
+    {
+        return false;
+    }
+}
+
+void FilterArray(int[] numbers, NumberFilter filter)
+{
+    foreach(var num in numbers)
+    {
+        if(filter(num) == true)
+        {
+            Console.Write($"{num}, ");
+        }
+    }
+    Console.WriteLine();
+}
+
+delegate bool NumberFilter(int number);
+
+🧩 Завдання 64.4 (Bool): «Логічний фільтр»
+Уяви, що ти створюєш систему управління розумним будинком. Тобі потрібно обробляти сигнали від датчиків (наприклад, "чи увімкнене світло"), 
+але іноді ці сигнали треба змінювати або перевіряти за різними правилами.
+Твоє технічне завдання:
+Делегат: Створи делегат SignalProcessor. Він має приймати bool і повертати bool.
+Методи-реалізації: Створи два методи, які відповідають цьому шаблону:
+InvertSignal: приймає стан і повертає протилежний (якщо прийшло true, повертає false і навпаки). Використовуй оператор !.
+KeepSignal: просто повертає те саме значення, яке прийшло (якщо прийшло true, повертає true).
+Метод-виконавець: Створи метод ProcessSensor.
+Він приймає назву датчика (string sensorName), поточний стан (bool state) та дію (SignalProcessor processor).
+Він має викликати processor(state) і вивести в консоль результат у форматі: "Датчик [Назва]: Початковий стан [Стан] -> Оброблений стан [Результат]".
+Запуск:
+Виклич ProcessSensor для датчика "Світло" зі станом true та методом InvertSignal.
+Виклич ProcessSensor для датчика "Двері" зі станом false та методом KeepSignal.
+
+✅ Рішення:
+ProcessSensor("Світло", true, InvertSignal);
+ProcessSensor("Двері", false, KeepSignal);
+
+bool InvertSignal(bool signal)
+{
+    return !signal;
+}
+
+bool KeepSignal(bool signal)
+{
+    return signal;
+}
+
+void ProcessSensor(string sensorName, bool state, SignalProcessor processor)
+{
+    bool result = processor(state);
+    Console.WriteLine($"Датчик {sensorName}: Початковий стан {state} -> Оброблений стан {result}");
+}
+
+delegate bool SignalProcessor(bool isSignal);
+
+📝 Завдання №64.5: "Аналізатор текстових логів" 📋
+Уяви, що ти пишеш утиліту для системних адміністраторів. 
+Програма отримує масив текстових логів (повідомлень від сервера) і має обробляти їх залежно від обраного режиму.
+Твоя мета:
+Створи систему з головним методом, який приймає масив логів та делегат-інструкцію.
+Головний метод має прокрутити цикл по масиву логів, обробити кожен елемент через делегат і вивести результат у консоль.
+Реалізуй два абсолютно різні методи-інструменти для цього делегата:
+Перший інструмент ("Фільтр"): має перевіряти лог. Якщо він містить слово "ERROR", то метод залишає його, а якщо ні — ігнорує (не виводить).
+Другий інструмент ("Модифікатор"): має брати кожен лог і додавати до нього поточний час або просто маркер збоку, наприклад, 
+перетворювати рядок "System reboot" на "[LOG]: System reboot", і виводити всі логи в такому оновленому вигляді.
+У основному коді створи масив із 3–4 різних рядків (нехай там будуть і звичайні повідомлення, і повідомлення зі словом "ERROR").
+Запусти програму спочатку в режимі фільтрації помилок, а потім у режимі додавання маркерів.
+Секрет цього завдання в тому, щоб подумати: яким має бути делегат (що приймати і що повертати), аби він підійшов і для першого, 
+і для другого інструменту, і як головний метод має з цим усім упоратися.
+
+✅ Рішення:
+ChangeMessages(["ERROR. Analyse", "System check", "Sending ERROR", "Check system", "Receiving ERROR"], ContainsError);
+ChangeMessages(["ERROR. Analyse", "System check", "Sending ERROR", "Check system", "Receiving ERROR"], Modificate);
+
+void ChangeMessages(string[] messages, ChangeTypes change)
+{
+    foreach (var message in messages)
+    {
+        string result = change(message);
+        if (result != null)
+        {
+            Console.Write($"{result}, ");
+        }
+    }
+    Console.WriteLine($"");
+}
+
+string ContainsError(string message)
+{
+    if (message.Contains("ERROR"))
+    {
+        return message;
+    }
+    else return null!;
+}
+
+string Modificate(string message)
+{
+    return $"[LOG]: {message}";
+}
+
+delegate string ChangeTypes(string message);
