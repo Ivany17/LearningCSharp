@@ -1,0 +1,331 @@
+Тема №67: Події (Events) 📢
+🧐 Що таке Подія (простими словами)
+Уяви, що в тебе є Кнопка і Лампочка.
+Без подій: Кнопка повинна знати, що до неї підключена саме Лампочка, і сама викликати метод лампочка.Увімкнутися(). 
+Якщо ти захочеш замість лампочки підключити Сирену — тобі доведеться переписувати код самої Кнопки. Це погано.
+З подіями: Кнопка просто "кричить" у простір: "Мене натиснули!". Їй байдуже, чи хтось її чує. 
+А Лампочка (або Сирена) просто "підписується" на цей крик.
+Подія — це спосіб зробити так, щоб об'єкти працювали разом, але при цьому нічого не знали один про одного.
+
+🏗️ Три кити подій
+Щоб подія запрацювала, потрібні три ролі:
+1️⃣ Видавець (Publisher) — об'єкт, який «створює» подію (наприклад, кнопка або сенсор).
+2️⃣ Підписник (Subscriber) — об'єкт, який чекає на подію і хоче на неї зреагувати.
+3️⃣ Обробник (Handler) — метод, який виконується, коли подія сталася.
+
+🛠️ Синтаксис: Як це виглядає в коді?
+Події базуються на делегатах, які ти вже знаєш (найчастіше на Action).
+📢 Оголошення: public event Action Назва;
+Це як створення радіостанції.
+✍️ Підписка: об'єкт.Назва += Метод;
+Це як налаштування твого радіоприймача на цю хвилю.
+📞 Виклик: Назва?.Invoke();
+Це як вихід в ефір. Знак ?. означає: "якщо на нас ніхто не підписаний — нічого не роби, щоб програма не зламалася".
+
+🧩 Чому не можна просто використати делегат?
+Ти можеш спитати: "Чому не написати public Action MyAction?"
+Безпека: Делегат може затерти будь-хто ззовні (= null).
+Інкапсуляція: Подію може викликати тільки той клас, у якому вона створена. 
+Підписники можуть лише додаватися (+=) або йти (-=). Це як закритий чат, де тільки адмін може писати повідомлення.
+Важливо: Ти не можеш відписатися від анонімної лямбди () => ..., бо в неї немає імені. Щоб мати змогу відписатися, метод повинен бути іменованим.
+
+✈️ Стандарт EventHandler (Як пишуть "дорослі")
+Хоча Action<T> працює чудово, у професійній розробці на C# прийнято використовувати спеціальний делегат EventHandler. 
+Це стандарт, який вимагає передавати два параметри:
+object? sender — хто саме надіслав сигнал (наприклад, яка саме кнопка натиснута).
+EventArgs e — об'єкт з даними (якщо вони є).
+
+🐣 Найспростіше завдання 67.1: "Привіт від кнопки"
+Створи клас SimpleButton.
+Всередині нього напиши лише один рядок:
+public event Action? OnClick;
+В Main:
+Створи об'єкт SimpleButton button = new SimpleButton();.
+Підпишись на подію прямою дією:
+button.OnClick += () => Console.WriteLine("Кнопку натиснуто!");
+А тепер викликай подію вручну (так можна тільки всередині класу, але для тесту ми зробимо метод в класі):
+Додай у клас SimpleButton метод public void Push() { OnClick?.Invoke(); } і виклич його з Main.
+
+✅ Рішення:
+SimpleButton button = new SimpleButton();
+button.OnClick += () => Console.WriteLine("Кнопку натиснуто!");
+button.Push();
+
+class SimpleButton
+{
+    public event Action? OnClick;
+    public void Push()
+    {
+        OnClick?.Invoke();
+    }
+}
+
+📝 Найелементарніше завдання 67.2: «Сигнал тривоги»
+Давай почнемо з бази: один клас «кричить», інший — «слухає».
+1. Створи клас Alarm (Видавець)
+Додай у нього подію: public event Action OnAlarmStart;
+Створи метод Start(), який виведе в консоль "Система: Запуск сирени..." і запустить подію через Invoke().
+2. Створи клас Guard (Підписник)
+Створи в ньому метод Run(), який просто виводить: "Охоронець: Біжу на допомогу!".
+3. У Main (Твій конвеєр)
+Створи об'єкти обох класів.
+Підпиши метод охоронця на подію тривоги: alarm.OnAlarmStart += guard.Run;.
+Запусти метод alarm.Start().
+
+✅ Рішення:
+Alarm alarm = new Alarm{};
+Guard guard = new Guard{};
+alarm.OnAlarmStart += guard.Run;
+alarm.Start();
+class Alarm
+{
+    public event Action? OnAlarmStart;
+    public void Start(){
+        Console.WriteLine("Система: Запуск сирени...");
+        OnAlarmStart?.Invoke();
+    }
+}
+
+class Guard
+{
+    public void Run()
+    {
+        Console.WriteLine("Охоронець: Біжу на допомогу!");
+    }
+}
+
+📝 Завдання 67.3: "Розумний термометр":
+Створи клас Thermometer.
+Створи подію, яка передає ціле число (температуру): public event Action<int>? OnTemperatureChanged;.
+Створи метод Update(int newTemp), який викликає подію і передає туди newTemp.
+У Main підпишися на подію так, щоб вона виводила: "Температура змінилася на [число] градусів!".
+
+✅ Рішення:
+Thermometer thermometer = new Thermometer{};
+thermometer.OnTemperatureChanged += (temp) => Console.WriteLine($"Температура змінилася на {temp} градусів!");
+thermometer.Update(12);
+
+class Thermometer
+{
+    public event Action<int>? OnTemperatureChanged;
+    public void Update(int newTemp)
+    {
+        OnTemperatureChanged?.Invoke(newTemp);
+    }
+}
+
+📝 Завдання 67.4: "Смарт-Банк"
+Уяви, що ти пишеш частину банківського додатку. Тобі потрібно створити систему, 
+яка автоматично попереджає клієнта, якщо на рахунку залишилося занадто мало грошей.
+Твоя задача:
+Клас BankCard (Видавець):
+Створи приватне поле int _money (початкове значення, наприклад, 1000).
+Створи подію OnLowBalance, яка передає число (int) — поточний залишок.
+Створи метод public void Spend(int amount).
+Логіка всередині Spend:
+Відніми amount від балансу.
+Якщо після покупки баланс став менше 100, запусти подію OnLowBalance і передай туди поточний залишок.
+Клас SmsService (Підписник):
+Створи метод SendWarning(int balance).
+Метод має виводити: "SMS: Увага! На рахунку залишилося лише {balance} грн!".
+У Main:
+Створи об'єкти картки та SMS-сервісу.
+Підпиши сервіс на подію картки.
+Виклич Spend кілька разів (наприклад, спочатку на 500, потім на 450), щоб баланс впав нижче 100 і подія спрацювала.
+
+✅ Рішення:
+BankCard visa = new BankCard{};
+SmsService sms = new SmsService();
+visa.OnLowBalance += sms.SendWarning;
+visa.Spend(500);
+visa.Spend(450);
+
+class BankCard
+{
+    private int _money = 1000;
+    public event Action<int>? OnLowBalance;
+    public void Spend(int amount)
+    {
+        _money -= amount;
+        if(_money < 100)
+        {
+            OnLowBalance?.Invoke(_money);
+        }
+    }
+}
+
+class SmsService
+{
+    public void SendWarning(int balance)
+    {
+        Console.WriteLine($"SMS: Увага! На рахунку залишилося лише {balance} грн!");
+    }
+}
+
+📝 Завдання 67.5: "Розумний будинок: Режим енергозбереження"
+У нас є Датчик світла, який сповіщає про настання темряви. На цей сигнал реагує Лампа. 
+Але у нас є "Денний режим", коли лампа має ігнорувати датчик, щоб не витрачати енергію.
+Клас LightSensor (Видавець):
+Подія OnDarkness, яка передає рівень темряви у відсотках (int).
+Метод public void CheckLight(int percent), який викликає подію, якщо percent > 80.
+Клас SmartLamp (Підписник):
+Метод public void TurnOn(int darkness), який пише: "Лампа: Темрява {darkness}%, вмикаю світло!".
+У Main:
+Створи датчик і лампу.
+Етап 1 (Вечір): Підпиши лампу на датчик. Виклич sensor.CheckLight(85);. (Лампа має ввімкнутися).
+Етап 2 (Ніч/Економія): Відпиши лампу від датчика (-=).
+Етап 3 (Перевірка): Знову виклич sensor.CheckLight(90);. (Нічого не має статися, бо лампа відписана).
+
+✅ Рішення:
+LightSensor sensor = new LightSensor{};
+SmartLamp lamp = new SmartLamp{};
+
+sensor.OnDarkness += lamp.TurnOn;
+sensor.CheckLight(85);
+sensor.OnDarkness -= lamp.TurnOn;
+sensor.CheckLight(90);
+
+class LightSensor
+{
+    public event Action<int>? OnDarkness;
+    public void CheckLight(int percent)
+    {
+        if(percent > 80)
+        {
+            OnDarkness?.Invoke(percent);
+        }
+    }
+}
+
+class SmartLamp
+{
+    public void TurnOn(int darkness)
+    {
+        Console.WriteLine($"Лампа: Темрява {darkness}%, вмикаю світло!");
+    }
+}
+
+📝 Завдання 67.6: "Контроль швидкості на дорозі" 🏎️
+Давай закріпимо цю ж механіку (подія + предикат), але на іншому життєвому прикладі. 
+Ми пишемо програму для розумної дорожньої камери, яка фіксує швидкість автомобілів.
+1. Клас SpeedCamera (Видавець)
+Створи клас SpeedCamera.
+Додай у нього подію OnSpeedViolationDetected типу Action<int>?. Вона буде передавати швидкість-порушника (int).
+Додай властивість для зберігання фільтра-критерію порушення:
+public Predicate<int>? SpeedFilter { get; set; }
+Створи метод void CheckSpeed(int speed).
+Логіка методу:
+Перевір, чи налаштований SpeedFilter.
+Якщо він налаштований, виклич його, передавши туди поточну speed.
+Якщо фільтр повернув true (швидкість задовга), запусти подію OnSpeedViolationDetected?.Invoke(speed);.
+Якщо фільтр повернув false (все в межах норми), просто виведи в консоль: $"Автомобіль їде зі швидкістю {speed} км/год. Швидкість безпечна.".
+2. Точка старту програми (Main / Top-level)
+Створи об'єкт камери.
+Твій крок 1 (Предикат): Присвой у SpeedFilter лямбду, яка перевіряє швидкість. Якщо вона більша за 50 (ліміт у місті), фільтр має повернути true.
+Твій крок 2 (Подія): Підпишись на подію OnSpeedViolationDetected через += (speed) =>. У лямбді виведи повідомлення жовтим кольором 
+(ConsoleColor.Yellow 🟡): $"[ФОТОФІКСАЦІЯ]: Спрацював спалах! Перевищення: {speed} км/год!". Не забудь скинути колір.
+Твій крок 3 (Перевірка): Виклич метод CheckSpeed двічі: спочатку зі швидкістю 45, а потім зі швидкістю 72.
+
+✅ Рішення:
+SpeedCamera camera = new SpeedCamera();
+camera.SpeedFilter = (speed) => speed > 50;
+camera.OnSpeedViolationDetected += (speed) =>
+{
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine($"[ФОТОФІКСАЦІЯ]: Спрацював спалах! Перевищення: {speed} км/год!");
+    Console.ResetColor();
+};
+
+camera.CheckSpeed(45);
+camera.CheckSpeed(72);
+
+class SpeedCamera
+{
+    public event Action<int>? OnSpeedViolationDetected;
+    public Predicate<int>? SpeedFilter { get; set; }
+    public void CheckSpeed(int speed)
+    {
+        if (SpeedFilter != null)
+        {
+            if (SpeedFilter(speed))
+            {
+                OnSpeedViolationDetected?.Invoke(speed);
+            }
+            else
+            {
+                Console.WriteLine($"Автомобіль їде зі швидкістю {speed} км/год. Швидкість безпечна.");
+            }
+        }
+    }
+}
+
+📝 Завдання 67.7: "Система Обробки Замовлень" 📦
+Уяви, що ми пишемо модуль для інтернет-магазину. Нам потрібно обробляти замовлення: перевіряти їх на валідність, 
+рахувати доставку та сповіщати систему, якщо замовлення успішно оформлене.
+1. Клас OrderProcessor (Видавець)
+Створи клас OrderProcessor.
+🔔 Подія: Додай подію OnOrderCompleted типу Action<decimal>?, яка буде сповіщати про успішне завершення замовлення та передавати його фінальну вартість.
+🛡️ Предикат: Додай властивість ValidationFilter типу Predicate<decimal>?. Цей фільтр перевірятиме суму замовлення 
+(наприклад, чи не є вона підозріло маленькою або нульовою).
+🧮 Функція: Додай властивість ShippingCalculator типу Func<decimal, decimal>?. Ця функція прийматиме чисту вартість товару, 
+додаватиме ціну доставки й повертатиме фінальну суму.
+⚙️ Метод: Створи метод void ProcessOrder(decimal basePrice).
+Спочатку перевір, чи налаштований ValidationFilter, і виклич його для basePrice.
+Якщо фільтр повернув false (замовлення не валідне), виведи в консоль 
+🔴 червоним кольором: "[Помилка]: Замовлення відхилено антивірусною системою." і зупини виконання методу (return).
+Якщо з валідністю все добре, перевір чи є ShippingCalculator. Обчисли фінальну вартість замовлення з урахуванням доставки.
+Запусти подію OnOrderCompleted, передавши туди отриману фінальну вартість.
+2. Точка старту програми (Main / Top-level)
+Створи об'єкт класу OrderProcessor.
+✍️ Налаштуй Предикат: Перевір, що сума замовлення basePrice більша за 10m грн (все, що менше або дорівнює — вважається помилкою).
+✍️ Налаштуй Функцію: Якщо сума замовлення менша за 1000m грн, доставка коштує 80m грн (тобто повертай ціна + 80m). 
+Якщо 1000m грн і більше — доставка безкоштовна (повертай просто ціну).
+✍️ Підпишись на Подію: Виведи в консоль 🟢 зеленим кольором: $"[Успіх]: Замовлення оформлено! Фінальна сума до сплати: {finalPrice} грн.".
+🧪 Протестуй логіку трьома викликами ProcessOrder:
+З сумою 5m (має спрацювати помилка валідації).
+З сумою 500m (має додатися доставка 80 грн).
+З сумою 1200m (доставка має бути безкоштовною).
+
+✅ Рішення:
+OrderProcessor processor = new OrderProcessor();
+processor.ValidatorFilter = (basePrice) => basePrice > 10m;
+processor.ShippingCalculator = (basePrice) => basePrice < 1000m ? basePrice + 80m : basePrice;
+processor.OnOrderCompleted += (finalPrice) =>
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine($"[Успіх]: Замовлення оформлено! Фінальна сума до сплати: {finalPrice} грн.");
+    Console.ResetColor();
+};
+
+processor.ProcessOrder(5m); // [Помилка]: Замовлення відхилено антивірусною системою.
+processor.ProcessOrder(500m); // [Успіх]: Замовлення оформлено! Фінальна сума до сплати: 580 грн.
+processor.ProcessOrder(1200m); // [Успіх]: Замовлення оформлено! Фінальна сума до сплати: 1200 грн.
+
+class OrderProcessor
+{
+    public event Action<decimal>? OnOrderCompleted;
+    public Predicate<decimal>? ValidatorFilter { get; set; }
+    public Func<decimal, decimal>? ShippingCalculator { get; set; }
+
+    public void ProcessOrder(decimal basePrice)
+    {
+        if (ValidatorFilter != null)
+        {
+            if (ValidatorFilter(basePrice))
+            {
+                if (ShippingCalculator != null)
+                {
+                    decimal finalPrice = ShippingCalculator(basePrice);
+                    OnOrderCompleted?.Invoke(finalPrice);
+                }
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("[Помилка]: Замовлення відхилено антивірусною системою.");
+                Console.ResetColor();
+                return;
+            }
+        }
+    }
+}
